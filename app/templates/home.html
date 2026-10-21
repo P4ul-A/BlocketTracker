@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero"><div><p class="eyebrow">YOUR NEXT CAR, IN PERSPECTIVE</p><h1>Watch the market.<br>Find your opportunity.</h1><p class="subtle">Your saved searches, local listings, and a second opinion on price.</p></div><div class="hero-note"><span class="live-dot"></span> Always watching<p>Refreshes every {{ '%g'|format(refresh_hours) }} hours.<br>Runs quietly on your NAS.</p></div></section>
+<div class="section-heading"><h2>Saved searches <span class="count">{{ searches|length }}</span></h2></div>
+{% if searches %}
+<div class="search-grid">
+{% for search in searches %}
+<article class="search-card"><div class="card-top"><span class="eyebrow">{{ search.config.make|replace('_',' ') }}</span><span class="badge {{ search.status }}">{{ search.status }}</span></div><a class="card-title" href="/searches/{{ search.id }}">{{ search.config.name }}</a><p>{{ search.config.model }}{% if search.config.year_from or search.config.year_to %} · {{ search.config.year_from or 'Any' }}–{{ search.config.year_to or 'now' }}{% endif %} · {{ search.config.seller_type|capitalize }} sellers</p><div class="card-stats"><strong>{{ search.count }}</strong><span>tracked listings</span></div><p class="small subtle">Last successful collection: <time data-date="{{ search.last_success or '' }}">{{ search.last_success or 'Waiting for first refresh' }}</time></p><div class="card-actions"><a href="/searches/{{ search.id }}">Explore listings ↗</a><button class="text-button" data-refresh="{{ search.id }}">Refresh</button></div></article>
+{% endfor %}
+</div>
+{% else %}
+<section class="empty"><span class="empty-icon">↗</span><h2>Start with a car you like.</h2><p>Save a make and model. We’ll collect matching adverts and comparable cars,<br>then help you spot prices below the market estimate.</p><a class="button" href="/searches/new">Create your first search</a></section>
+{% endif %}
+<section class="info-strip"><div><strong>01 / Watch</strong><p>Choose a car and the criteria that matter to you.</p></div><div><strong>02 / Compare</strong><p>Explore asking prices and seller types on the map.</p></div><div><strong>03 / Discover</strong><p>Spot listings at least 10% below their estimated asking price.</p></div></section>
+{% endblock %}

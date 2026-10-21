@@ -1,0 +1,43 @@
+services:
+  blocket-tracker:
+    build: .
+    image: blocket-tracker:local
+    platform: linux/amd64
+    user: "${PUID:-10001}:${PGID:-10001}"
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${PORT:-8080}:8000"
+    volumes:
+      - type: bind
+        source: ${DATA_PATH:?Set DATA_PATH to an existing writable HexOS dataset directory}
+        target: /data
+        bind:
+          create_host_path: false
+    environment:
+      LLM_ENABLED: ${LLM_ENABLED:-true}
+      LLM_URL: ${LLM_URL:-http://host.docker.internal:11434}
+      LLM_MODEL: ${LLM_MODEL:-qwen3:1.7b}
+      LLM_TIMEOUT: ${LLM_TIMEOUT:-180}
+      LLM_THREADS: ${LLM_THREADS:-2}
+      DATA_DIR: /data
+      TZ: Europe/Stockholm
+      REFRESH_HOURS: ${REFRESH_HOURS:-6}
+      MAX_PAGES: ${MAX_PAGES:-50}
+      DETAIL_LIMIT: ${DETAIL_LIMIT:-100}
+      REQUEST_DELAY: ${REQUEST_DELAY:-0.5}
+      GEOCODING: ${GEOCODING:-true}
+      GEOCODER_URL: ${GEOCODER_URL:-https://nominatim.openstreetmap.org/search}
+      GEOCODER_USER_AGENT: ${GEOCODER_USER_AGENT:-BlocketTracker/1.0 personal NAS car tracker}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

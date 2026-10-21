@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if search else 'New' }} search · Blocket Tracker{% endblock %}
+{% block content %}
+<a class="back" href="{{ '/searches/' ~ search.id if search else '/' }}">← Back</a>
+<div class="page-heading"><p class="eyebrow">DEFINE YOUR CAR</p><h1>{{ 'Edit your search' if search else 'What are you looking for?' }}</h1><p class="subtle">Purchase filters narrow your results. We collect broader comparables to learn the market.</p></div>
+{% if search and search.config.get("description_filter_notice") %}<p class="notice">{{ search.config.description_filter_notice }}</p>{% endif %}
+<form id="search-form" class="panel form-panel" data-id="{{ search.id if search else '' }}">
+<div class="form-grid">
+<label class="wide">Search name<input name="name" required maxlength="100" placeholder="My next Volvo V60"></label>
+<label>Make<select name="make" required><option value="">Choose a make</option>{% for value in options.makes %}<option value="{{ value }}">{{ value|replace('_',' ')|title }}</option>{% endfor %}</select></label>
+<label>Model<input name="model" required maxlength="80" placeholder="V60"><small>Exact model name, e.g. V60, Golf, Model 3.</small></label>
+<label class="wide">Additional keywords<input name="keywords" maxlength="200" placeholder="Optional trim or equipment"></label>
+<label>Minimum price (SEK)<input name="price_from" type="number" min="0" step="1" placeholder="Any"></label>
+<label>Maximum price (SEK)<input name="price_to" type="number" min="0" step="1" placeholder="Any"></label>
+<label>Earliest model year<input name="year_from" type="number" min="1900" max="2100" placeholder="Any"></label>
+<label>Latest model year<input name="year_to" type="number" min="1900" max="2100" placeholder="Any"></label>
+<label>Minimum mileage (km)<input name="milage_from" type="number" min="0" placeholder="Any"></label>
+<label>Maximum mileage (km)<input name="milage_to" type="number" min="0" placeholder="Any"></label>
+<label>Region<select name="location"><option value="">All of Sweden</option>{% for value in options.locations %}<option value="{{ value }}">{{ value|replace('_',' ')|title }}</option>{% endfor %}</select></label>
+<label>Transmission<select name="transmission"><option value="">Any transmission</option>{% for value in options.transmissions %}<option value="{{ value }}">{{ value|capitalize }}</option>{% endfor %}</select></label>
+<label>Fuel contains<input name="fuel" maxlength="60" placeholder="e.g. Diesel, El, Bensin"><small>Matches the Swedish fuel label on the advert.</small></label>
+<label>Seller type<select name="seller_type"><option value="all">All sellers</option><option value="private">Private</option><option value="commercial">Commercial</option><option value="unknown">Unknown</option></select></label>
+{% for key,label in options.description_facts.items() %}
+<label>{{ label }}<select name="fact_{{ key }}"><option value="">Any</option><option value="yes">Yes — {{ 'assumed unless denied' if key == 'drivable' else 'stated in description' }}</option><option value="no">No — explicitly denied</option><option value="unknown">{{ 'Not used for drivability' if key == 'drivable' else 'Unknown / not stated' }}</option></select></label>
+{% endfor %}
+<label>Price highlight threshold (%)<input name="deal_threshold" type="number" min="0" max="99" step="0.1" value="10" required></label>
+</div><div class="notice">Seller type is also a price-model feature. Unclassified sellers remain “unknown”. Missing values do not satisfy numeric purchase filters. Description filters use LLM findings; unknown does not mean no.</div>
+<p id="form-error" class="error" role="alert" hidden></p>
+<div class="form-actions"><button class="button" type="submit">{{ 'Save changes' if search else 'Save & start tracking' }}</button>{% if search %}<button type="button" class="text-button danger" id="delete-search">Delete search</button>{% endif %}</div>
+</form>
+<script id="initial-config" type="application/json">{{ (search.config if search else {})|tojson }}</script>
+{% endblock %}

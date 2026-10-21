@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#18382f">
+  <title>{% block title %}Blocket Tracker{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css?v={{ style_version }}">
+  {% block head %}{% endblock %}
+  <script src="/static/app.js?v={{ app_js_version }}" defer></script>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="/"><span class="brand-mark">b.</span> Blocket Tracker</a><span class="header-note">A better view of the used car market</span><a href="/settings">Settings</a><a class="button small" href="/searches/new">+ New search</a></header>
+<main>{% block content %}{% endblock %}</main>
+<footer>Personal car watch · Prices in SEK · Mileage in kilometres<br>Estimates reflect asking prices, not completed sales. Not affiliated with Blocket.</footer>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

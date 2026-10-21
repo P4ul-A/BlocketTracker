@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}{{ search.config.name }} · Blocket Tracker{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/vendor/leaflet.css"><script src="/static/vendor/leaflet.js" defer></script>{% endblock %}
+{% block content %}
+<div id="search-page" data-id="{{ search.id }}">
+<a class="back" href="/">← All searches</a>
+<div class="page-heading heading-row"><div><p class="eyebrow">{{ search.config.make|replace('_',' ') }} / {{ search.config.model }}</p><h1>{{ search.config.name }}</h1><p class="subtle">Highlights start at {{ search.config.deal_threshold }}% below or above estimated asking price.</p></div><div class="actions"><a class="button secondary" href="/searches/{{ search.id }}/edit">Edit search</a><div class="refresh-control"><button class="button" data-refresh="{{ search.id }}">Refresh now</button><details class="collection-report">
+<summary id="collection-timestamp" title="Show full collection report">Collection: loading…</summary>
+{% if search.config.get("description_filter_notice") %}<p class="notice">{{ search.config.description_filter_notice }}</p>{% endif %}
+<div id="collection-status" class="notice" aria-live="polite">Loading collection status…</div>
+</details></div></div></div>
+<div class="search-overview">
+<div class="metrics"><div><span>Visible listings</span><strong id="listing-count">—</strong></div><div><span>Highlighted listings</span><strong id="deal-count">—</strong></div><div><span>Make/model comparables</span><strong id="sample-count">—</strong></div><div><span>Make/model error (MAPE)</span><strong id="model-error">—</strong></div></div>
+<details class="model-panel">
+<summary><strong>About the current price model</strong> <span id="model-name" class="badge">Waiting for data</span></summary>
+<p id="model-summary" class="subtle"></p>
+<p id="model-factors"></p>
+<p id="model-year-method"></p>
+<p id="model-quality" class="notice"></p>
+<h3>Model comparison</h3><p class="small subtle">Figures use this make/model only; no previous search’s errors are substituted. All candidates use the same held-out adverts. Smaller errors are better. Selection uses these same folds, so these figures are not an independent accuracy guarantee.</p>
+<div class="table-scroll"><table><thead><tr><th>Model</th><th>Average error (%)</th><th>Average error (SEK)</th></tr></thead><tbody id="model-comparison"></tbody></table></div>
+<h3>Accuracy by model year · this make/model</h3><p class="small subtle">Medians reflect the cars collected for each year, including differences in mileage and trim. Small samples can be unreliable.</p>
+<div class="table-scroll"><table><thead><tr><th>Year</th><th>Cars</th><th>Median asking</th><th>Median estimate</th><th>Average error (%)</th></tr></thead><tbody id="model-years"></tbody></table></div>
+<p class="small subtle">Description findings for drivability and included tyres are model inputs when analyzed. Not included: a full condition assessment, service history, photos, or other equipment details. Asking prices are not completed sale prices. Repeatedly relisted cars can bias validation.</p>
+</details>
+</div>
+
+<div class="toolbar"><label>Seller<select id="seller-filter"><option value="all">All saved matches</option><option value="private">Private</option><option value="commercial">Commercial</option><option value="unknown">Unknown</option></select></label><label>Sort<select id="sort-filter"><option value="discount">Best discount</option><option value="price">Lowest price</option><option value="newest">Recently discovered</option></select></label><details class="finding-dropdown">
+<summary>Description findings <span id="finding-filter-count" class="badge" hidden></span></summary>
+<div class="panel finding-filter-panel">
+<p class="small subtle">Combine rows to narrow your saved search. Drivable defaults to Yes unless explicitly denied, including while analysis is pending or unavailable. No requires a supported denial. Unknown applies to the other findings.</p>
+<div class="table-scroll"><table class="finding-grid"><thead><tr><th scope="col">Finding</th><th scope="col">Any</th><th scope="col">Yes</th><th scope="col">No</th><th scope="col">Unknown</th></tr></thead><tbody>
+{% for key,label in fact_labels.items() %}<tr><th scope="row">{{ label }}</th>{% for value,title in [('', 'Any'),('yes','Yes'),('no','No'),('unknown','Unknown')] %}<td><label><input type="radio" name="finding_{{ key }}" value="{{ value }}" data-fact="{{ key }}" aria-label="{{ label }}: {{ title }}" {% if value == '' %}checked{% endif %}></label></td>{% endfor %}</tr>{% endfor %}
+</tbody></table></div><p id="analysis-status" class="small subtle" aria-live="polite"></p>
+</div>
+</details><label class="checkbox"><input type="checkbox" id="deals-filter"> Highlights only</label><label class="checkbox"><input type="checkbox" id="archived-filter"> Include not seen</label></div>
+<div class="results-layout"><section><p id="results-note" class="small subtle"></p><div id="results" aria-live="polite"><div class="empty">Loading listings…</div></div></section><aside class="map-panel"><div id="map" aria-label="Car listing locations"></div><div class="map-caption"><span class="map-dot"></span> Listing <span class="map-dot deal"></span> Below estimate <span class="map-dot over-price"></span> Above estimate <span id="map-count"></span></div><p class="small subtle">Town-level fallback markers are approximate. Advert coordinates may also be approximate.</p></aside></div>
+</div>
+{% endblock %}

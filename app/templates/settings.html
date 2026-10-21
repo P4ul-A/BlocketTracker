@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Settings · Blocket Tracker{% endblock %}
+{% block content %}
+<a class="back" href="/">← Saved searches</a>
+<div class="page-heading"><h1>Settings</h1><p class="subtle">Collection timing and local description analysis.</p></div>
+<div class="form-panel">
+<section class="panel">
+  <h2>Automatic refresh</h2>
+  <form id="settings-form">
+    <div class="form-grid"><label>Refresh interval (hours)
+      <input name="refresh_hours" type="number" min="0.25" step="any" required value="{{ refresh_hours }}" aria-describedby="refresh-help">
+      <small id="refresh-help">How often saved searches collect new adverts. Minimum 0.25 hours (15 minutes).</small>
+    </label></div>
+    <p class="small subtle">Applies within one minute and persists across restarts. A running collection will finish normally.</p>
+    <button class="button" type="submit">Save settings</button>
+    <p id="settings-message" role="status" aria-live="polite"></p>
+  </form>
+</section>
+<section class="panel" style="margin-top:20px">
+  <div class="heading-row"><h2>Ollama</h2><button class="button secondary small" id="check-ollama" type="button">Check again</button></div>
+  <p id="ollama-status" data-state="checking" role="status" aria-live="polite">Checking Ollama…</p>
+  <p class="small subtle">Service: {{ llm_url }}<br>Model: {{ llm_model }}<br>Description analysis: {{ 'Enabled' if llm_enabled else 'Disabled' }}</p>
+  {% if not llm_enabled %}<p class="small subtle">Set LLM_ENABLED=true in the environment and restart the app to enable analysis.</p>{% endif %}
+  <p class="small subtle">Checks service connectivity and model installation without running an analysis.</p>
+</section>
+</div>
+{% endblock %}
