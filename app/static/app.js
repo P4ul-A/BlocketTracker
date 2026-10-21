@@ -155,13 +155,14 @@ if (searchPage) {
     const body = node('div', null, 'listing-body');
     const meta = node('div', null, 'listing-meta');
     meta.append(node('span', `${car.seller_type} seller`));
-    meta.append(favouriteButton(car));
-    body.append(meta);
+    const actions = node('div', null, 'listing-card-actions');
+    actions.append(favouriteButton(car));
+    body.append(actions, meta);
     const priceBadges = node('div', null, 'listing-price-badges');
     if (car.highlight) priceBadges.append(node('span', `${car.discount.toFixed(1)}% below estimate`, 'deal-badge'));
     if (car.above_estimate) priceBadges.append(node('span', `${Math.abs(car.discount).toFixed(1)}% above estimate`, 'deal-badge over-estimate-badge'));
     if (!car.active) priceBadges.append(node('span', 'Not seen in latest complete search', 'badge'));
-    if (priceBadges.childNodes.length) body.append(priceBadges);
+    if (priceBadges.childNodes.length) actions.append(priceBadges);
     const facts = {...(car.analysis?.status === 'ready' ? car.analysis.facts : {})};
     const labels = {drivable: 'Drivable', extra_tires: 'Additional tyres', winter_tires: 'Winter tyres', summer_tires: 'Summer tyres'};
     const findings = node('div', null, 'finding-badges');
@@ -398,23 +399,28 @@ if (settingsForm) {
 
 // Keep dashboard analysis indicators current while the background worker runs.
 const llmIndicators = document.querySelectorAll('[data-llm-search]');
-if (llmIndicators.length) {
+const modelLlmWaiting = document.querySelector('#model-llm-waiting');
+if (llmIndicators.length || modelLlmWaiting) {
   let updatingIndicators = false;
   async function updateLlmIndicators() {
     if (document.hidden || updatingIndicators) return;
     updatingIndicators = true;
     try {
       const status = await api('/api/status');
+      if (modelLlmWaiting) {
+        const analysis = status.description_analysis;
+        modelLlmWaiting.hidden = !analysis.enabled || !(analysis.pending || analysis.errors);
+      }
       status.searches.forEach(search => {
         const indicator = document.querySelector(`[data-llm-search="${search.id}"]`);
         if (!indicator) return;
-        const label = `LLM: ${search.llm_pending} pending, ${search.llm_errors} awaiting retry`;
+        const label = search.llm_label;
         if (indicator.getAttribute('aria-label') !== label) indicator.setAttribute('aria-label', label);
-        indicator.dataset.state = search.llm_pending ? 'pending' : 'retry';
-        indicator.hidden = !search.llm_pending && !search.llm_errors;
+        indicator.dataset.state = search.llm_state;
       });
     } catch (_) { /* Keep the last known indicator during a connection failure. */ }
     finally { updatingIndicators = false; }
   }
+  updateLlmIndicators();
   setInterval(updateLlmIndicators, 10000);
 }

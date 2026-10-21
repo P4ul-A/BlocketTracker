@@ -152,7 +152,7 @@ def set_state(key, value):
 
 
 def searches():
-    """Return collection counts and outstanding LLM work for each saved search."""
+    """Return collection counts and explicit LLM status for every saved search."""
     with connect() as db:
         rows = db.execute("""SELECT s.*, u.config AS pending_config, (SELECT count(*) FROM search_listings m
             WHERE m.search_id=s.id AND m.active=1) AS count FROM searches s
@@ -164,6 +164,8 @@ def searches():
         filters = search["config"].get("description_filters", {})
         search["llm_pending"] = 0
         search["llm_errors"] = 0
+        search["llm_ready"] = 0
+        search["llm_no_description"] = 0
         if filters or LLM_ENABLED:
             items = listings(search["id"])
             if filters:
@@ -172,6 +174,18 @@ def searches():
                 states = [item["analysis"]["status"] for item in items]
                 search["llm_pending"] = states.count("pending")
                 search["llm_errors"] = states.count("error")
+                search["llm_ready"] = states.count("ready")
+                search["llm_no_description"] = states.count("no_description")
+        if not LLM_ENABLED:
+            search["llm_state"] = "disabled"
+            search["llm_label"] = "LLM analysis is disabled."
+        else:
+            search["llm_state"] = ("pending" if search["llm_pending"] else "retry" if search["llm_errors"]
+                                   else "ready" if search["llm_ready"] else "unavailable")
+            search["llm_label"] = (
+                f"LLM: {search['llm_ready']} analyzed, {search['llm_pending']} pending, "
+                f"{search['llm_errors']} awaiting retry, {search['llm_no_description']} without a description."
+            )
     return result
 
 

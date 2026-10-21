@@ -46,8 +46,8 @@
 
 /* Pair the collection badge with a colored chip icon for unfinished LLM work. */
 .card-status{display:inline-flex;align-items:center;gap:8px;flex-shrink:0}
-.llm-indicator{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;color:#26547b;background:#e4efff}
-.llm-indicator[data-state="retry"]{color:#81401d;background:#ffeddb}
+.llm-indicator{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;color:#164a85;background:#bddbff;box-shadow:inset 0 0 0 1px #78aae5}
+.llm-indicator[data-state="retry"]{color:#7a3b08;background:#ffd29b;box-shadow:inset 0 0 0 1px #e5a04d}
 .llm-indicator[hidden]{display:none}
 
 /* Show status immediately on hover or keyboard focus, without native tooltip delays. */
@@ -65,6 +65,29 @@
 .favourites-card{border-color:#d8bd64}
 .favourites-list{max-width:950px}
 
-/* Keep the star at the upper right, with estimate badges on a separate row below. */
+/* Float the action column so listing text starts at the top alongside it. */
 .listing-meta .favourite-button{margin-left:auto}
 .listing-price-badges{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin-top:6px}
+
+.listing-body{display:flow-root;min-width:0}
+.listing-card-actions{float:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:50%;margin:0 0 8px 12px}
+.listing-card-actions .listing-price-badges{margin-top:0;text-align:right}
+
+/* Keep completed, disabled, and unavailable analysis visible on every search. */
+.llm-indicator[data-state="ready"]{color:#14532d;background:#b5e4c0;box-shadow:inset 0 0 0 1px #72b789}
+.llm-indicator[data-state="disabled"],.llm-indicator[data-state="unavailable"]{color:#4c5852;background:#dde3de;box-shadow:inset 0 0 0 1px #a9b5ad}
+
+/* Distinguish collection outcomes with stronger fills and matching outlines. */
+.card-status .badge{font-weight:650;box-shadow:inset 0 0 0 1px var(--status-border)}
+.card-status .badge.complete{color:#14532d;background:#b5e4c0;--status-border:#72b789}
+.card-status .badge.interrupted{color:#713f12;background:#ffe08a;--status-border:#d6a52b}
+.card-status .badge.partial{color:#7a3b08;background:#ffd29b;--status-border:#e5a04d}
+.card-status .badge.error{color:#8b1e26;background:#ffc3c8;--status-border:#df8890}
+.card-status .badge.running,.card-status .badge.pending{color:#164a85;background:#bddbff;--status-border:#78aae5}
+
+
+#model-llm-waiting{width:22px;height:22px;vertical-align:middle}
+
+/* Let the model status tooltip extend beyond the collapsed overview. */
+.search-overview{overflow:visible}
+.search-overview .metrics{border-radius:10px 10px 0 0}
