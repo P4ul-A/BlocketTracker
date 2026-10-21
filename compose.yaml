@@ -22,7 +22,6 @@ services:
       LLM_THREADS: ${LLM_THREADS:-2}
       DATA_DIR: /data
       TZ: Europe/Stockholm
-      REFRESH_HOURS: ${REFRESH_HOURS:-6}
       MAX_PAGES: ${MAX_PAGES:-50}
       DETAIL_LIMIT: ${DETAIL_LIMIT:-100}
       REQUEST_DELAY: ${REQUEST_DELAY:-0.5}

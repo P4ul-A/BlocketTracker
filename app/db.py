@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import json
 import sqlite3
 
-from .config import DATA_DIR, REFRESH_HOURS
+from .config import DATA_DIR, LLM_ENABLED
 
 
 def now():
@@ -148,7 +148,7 @@ def set_state(key, value):
 
 
 def searches():
-    """Return saved searches with collection status and active listing counts."""
+    """Return collection counts and outstanding LLM work for each saved search."""
     with connect() as db:
         rows = db.execute("""SELECT s.*, u.config AS pending_config, (SELECT count(*) FROM search_listings m
             WHERE m.search_id=s.id AND m.active=1) AS count FROM searches s
@@ -158,8 +158,16 @@ def searches():
     from .description import matches_facts
     for search in result:
         filters = search["config"].get("description_filters", {})
-        if filters:
-            search["count"] = sum(matches_facts(item, filters) for item in listings(search["id"]))
+        search["llm_pending"] = 0
+        search["llm_errors"] = 0
+        if filters or LLM_ENABLED:
+            items = listings(search["id"])
+            if filters:
+                search["count"] = sum(matches_facts(item, filters) for item in items)
+            if LLM_ENABLED:
+                states = [item["analysis"]["status"] for item in items]
+                search["llm_pending"] = states.count("pending")
+                search["llm_errors"] = states.count("error")
     return result
 
 
@@ -208,6 +216,6 @@ def listings(search_id, seller="all", archived=False):
     return result
 
 
-def refresh_hours():
-    """Read the saved collection interval, falling back to the environment default."""
-    return get_state("settings", {}).get("refresh_hours", REFRESH_HOURS)
+def refresh_start_hours():
+    """Return sorted daily start hours, defaulting legacy installations to midnight."""
+    return sorted(set(get_state("settings", {}).get("refresh_start_hours", [0])))

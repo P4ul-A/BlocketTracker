@@ -7,11 +7,16 @@
 <section class="panel">
   <h2>Automatic refresh</h2>
   <form id="settings-form">
-    <div class="form-grid"><label>Refresh interval (hours)
-      <input name="refresh_hours" type="number" min="0.25" step="any" required value="{{ refresh_hours }}" aria-describedby="refresh-help">
-      <small id="refresh-help">How often saved searches collect new adverts. Minimum 0.25 hours (15 minutes).</small>
-    </label></div>
-    <p class="small subtle">Applies within one minute and persists across restarts. A running collection will finish normally.</p>
+    <fieldset class="refresh-schedule" aria-describedby="refresh-help">
+      <legend>Daily rescan start hours</legend>
+      <p id="refresh-help" class="small subtle">Stockholm time (Europe/Stockholm). Select 00:00 for midnight, or leave all unchecked to disable automatic rescans.</p>
+      <div class="refresh-hours">
+      {% for hour in range(24) %}
+        <label><input name="refresh_start_hours" type="checkbox" value="{{ hour }}"{% if hour in refresh_start_hours %} checked{% endif %}> {{ '%02d:00'|format(hour) }}</label>
+      {% endfor %}
+      </div>
+    </fieldset>
+    <p class="small subtle">Saved across restarts. Scans queue within one minute during selected hours and run one search at a time. Running scans finish normally. Missed hours are skipped.</p>
     <button class="button" type="submit">Save settings</button>
     <p id="settings-message" role="status" aria-live="polite"></p>
   </form>

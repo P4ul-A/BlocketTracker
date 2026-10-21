@@ -314,7 +314,7 @@ if (settingsForm) {
     const message = document.querySelector('#settings-message');
     button.disabled = true;
     try {
-      await api('/api/settings', {method: 'PUT', body: JSON.stringify({refresh_hours: Number(settingsForm.elements.refresh_hours.value)})});
+      await api('/api/settings', {method: 'PUT', body: JSON.stringify({refresh_start_hours: [...settingsForm.querySelectorAll('[name="refresh_start_hours"]:checked')].map(input => Number(input.value))})});
       message.textContent = 'Settings saved. The schedule updates within one minute.';
     } catch (error) { message.textContent = error.message; }
     finally { button.disabled = false; }
@@ -343,4 +343,27 @@ if (settingsForm) {
   }
   checkButton.addEventListener('click', checkOllama);
   checkOllama();
+}
+
+// Keep dashboard analysis indicators current while the background worker runs.
+const llmIndicators = document.querySelectorAll('[data-llm-search]');
+if (llmIndicators.length) {
+  let updatingIndicators = false;
+  async function updateLlmIndicators() {
+    if (document.hidden || updatingIndicators) return;
+    updatingIndicators = true;
+    try {
+      const status = await api('/api/status');
+      status.searches.forEach(search => {
+        const indicator = document.querySelector(`[data-llm-search="${search.id}"]`);
+        if (!indicator) return;
+        const label = `LLM: ${search.llm_pending} pending, ${search.llm_errors} awaiting retry`;
+        if (indicator.getAttribute('aria-label') !== label) indicator.setAttribute('aria-label', label);
+        indicator.dataset.state = search.llm_pending ? 'pending' : 'retry';
+        indicator.hidden = !search.llm_pending && !search.llm_errors;
+      });
+    } catch (_) { /* Keep the last known indicator during a connection failure. */ }
+    finally { updatingIndicators = false; }
+  }
+  setInterval(updateLlmIndicators, 10000);
 }

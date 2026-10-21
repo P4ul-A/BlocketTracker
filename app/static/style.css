@@ -30,3 +30,28 @@
 #ollama-status::before{content:"";display:inline-block;width:10px;height:10px;margin-right:10px;border-radius:50%;background:#8b948f}
 #ollama-status[data-state="ready"]::before{background:#368444;box-shadow:0 0 0 4px #36844418}
 #ollama-status[data-state="error"]::before{background:#b7552c}
+
+/* Extend the title link across the card, keeping separate actions above it. */
+.search-card{position:relative}
+.search-card .card-title::after{content:"";position:absolute;inset:0;border-radius:12px}
+.search-card .card-actions a,.search-card .card-actions button{position:relative;z-index:1}
+.search-card:focus-within{outline:3px solid #82ad5a;outline-offset:3px}
+
+/* Keep the daily start-hour checklist compact on phones and desktops. */
+.refresh-schedule{margin:0;padding:0;border:0;min-width:0}
+.refresh-schedule legend{font-weight:650;margin-bottom:8px}
+.refresh-hours{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px}
+.refresh-hours label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.refresh-hours input{width:18px;height:18px;margin:0;accent-color:var(--ink)}
+
+/* Pair the collection badge with a colored chip icon for unfinished LLM work. */
+.card-status{display:inline-flex;align-items:center;gap:8px;flex-shrink:0}
+.llm-indicator{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;color:#26547b;background:#e4efff}
+.llm-indicator[data-state="retry"]{color:#81401d;background:#ffeddb}
+.llm-indicator[hidden]{display:none}
+
+/* Show status immediately on hover or keyboard focus, without native tooltip delays. */
+.llm-indicator{cursor:help}
+.llm-indicator:hover,.llm-indicator:focus{z-index:3}
+.llm-indicator::after{content:attr(aria-label);position:absolute;top:100%;right:0;width:max-content;max-width:220px;padding:8px 12px;border-radius:6px;background:var(--ink);color:white;font-size:12px;font-weight:400;line-height:1.5;box-shadow:0 3px 12px #0002;visibility:hidden;opacity:0;pointer-events:none}
+.llm-indicator:hover::after,.llm-indicator:focus::after{visibility:visible;opacity:1}

@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 import json
 import logging
 import time
+from zoneinfo import ZoneInfo
 
 import httpx
 
@@ -235,12 +236,18 @@ class Collector:
                 self.queue.task_done()
 
     async def scheduler(self):
-        """Queue overdue searches on startup and every minute, including after restart."""
+        """Queue each selected Stockholm hour once per day, without overdue catch-up.
+
+        Persist the slot before queueing so restarts during the same hour do not
+        repeat it. Searches run serially and may finish after the selected hour.
+        During the autumn clock change, a repeated local hour runs only once.
+        """
         while True:
-            interval = db.refresh_hours()
-            for search in db.searches():
-                attempt = search["last_attempt"]
-                overdue = not attempt or datetime.now(timezone.utc) - datetime.fromisoformat(attempt) >= timedelta(hours=interval)
-                if overdue or search["status"] == "interrupted":
+            local_now = datetime.now(ZoneInfo("Europe/Stockholm"))
+            slot = local_now.strftime("%Y-%m-%dT%H")
+            if (local_now.hour in db.refresh_start_hours()
+                    and db.get_state("refresh_schedule", {}).get("last_slot") != slot):
+                db.set_state("refresh_schedule", {"last_slot": slot})
+                for search in db.searches():
                     self.enqueue(search["id"])
             await asyncio.sleep(60)

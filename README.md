@@ -103,8 +103,9 @@ previous matches. After a fully completed refresh, missing matches are labeled
 “not seen”; that does **not** mean sold. Archived matches can be shown in results.
 
 Manual refreshes are queued immediately and duplicate requests are coalesced.
-Automatic scheduling resumes from saved timestamps after restart. A failed refresh
-retries at the next scheduled interval; use manual refresh to retry sooner.
+Automatic rescans run at selected daily hours in Stockholm time. Missed hours are
+skipped after restart. A failed refresh retries at the next selected hour; use
+manual refresh to retry sooner.
 
 ## Asking-price model
 
@@ -146,7 +147,6 @@ is enabled, extracted description facts are included in the structured price mod
 | `DATA_PATH` | Required in Compose | Existing persistent NAS directory |
 | `PUID` / `PGID` | `10001` / `10001` | Numeric runtime identity with dataset write access |
 | `PORT` | `8080` | NAS HTTP port |
-| `REFRESH_HOURS` | `6` | Automatic interval, minimum 0.25 hours |
 | `MAX_PAGES` | `50` | Pages per purchase/broad query, maximum 50 |
 | `DETAIL_LIMIT` | `100` | Maximum detail requests per search refresh; zero disables them |
 | `REQUEST_DELAY` | `0.5` | Minimum seconds between Blocket requests, at least 0.2 |
@@ -294,10 +294,19 @@ analysis metadata for debugging future missed classifications.
 
 ### Settings
 
-Open **Settings** in the header to change the automatic collection interval
-(minimum 15 minutes). The saved value overrides `REFRESH_HOURS`, persists in
-SQLite across restarts, and takes effect at the scheduler's next minute check.
-The dashboard shows the saved interval; browser result polling is separate.
+Open **Settings** in the header to select daily rescan start hours (00:00–23:00)
+in **Europe/Stockholm** time. Midnight (00:00) is the default, including for older
+installations with an interval setting. Select multiple hours for more frequent
+rescans, or uncheck all hours to disable automatic rescans. The old `REFRESH_HOURS`
+environment variable is no longer used.
+
+The checklist persists in SQLite across restarts and applies within one minute.
+Each selected hour queues all saved searches once, processed one at a time; scans
+may finish after that hour. Restarting during an already queued hour does not
+repeat it, and missed hours are skipped. The repeated hour when daylight saving
+time ends runs once; a skipped spring hour does not run. Manual refreshes and
+initial collection for new searches still queue immediately. The dashboard shows
+the saved schedule; browser result polling is separate.
 
 The page also checks whether Ollama is reachable and the configured `LLM_MODEL`
 is installed, and shows whether description analysis is enabled. Use **Check

@@ -7,7 +7,7 @@ import logging
 
 import httpx
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request
@@ -124,26 +124,26 @@ def require_search(search_id):
 @app.get("/")
 def home(request: Request):
     """Render the saved-search dashboard."""
-    return templates.TemplateResponse(request=request, name="home.html", context={"searches": db.searches(), "refresh_hours": db.refresh_hours()})
+    return templates.TemplateResponse(request=request, name="home.html", context={"searches": db.searches(), "refresh_start_hours": db.refresh_start_hours()})
 
 
 class SettingsConfig(BaseModel):
-    """Persist the collection interval in hours; enforce a fifteen-minute minimum."""
+    """Choose daily collection start hours in Europe/Stockholm; empty disables scheduling."""
 
-    refresh_hours: float = Field(ge=0.25, allow_inf_nan=False)
+    refresh_start_hours: list[Annotated[int, Field(strict=True, ge=0, le=23)]] = Field(max_length=24)
 
 
 @app.get("/settings")
 def settings_page(request: Request):
     """Render collection preferences and the configured Ollama connection."""
     return templates.TemplateResponse(request=request, name="settings.html", context={
-        "refresh_hours": db.refresh_hours(), "llm_enabled": LLM_ENABLED,
+        "refresh_start_hours": db.refresh_start_hours(), "llm_enabled": LLM_ENABLED,
         "llm_model": LLM_MODEL, "llm_url": LLM_URL})
 
 
 @app.put("/api/settings")
 def save_settings(settings: SettingsConfig):
-    """Save the interval immediately for the scheduler's next minute check."""
+    """Save daily start hours for the scheduler's next minute check."""
     db.set_state("settings", settings.model_dump())
     return settings.model_dump()
 
@@ -322,7 +322,7 @@ def status(request: Request):
     """Expose queued/running refreshes and collection/model status."""
     collector = request.app.state.collector
     return {"running": collector.running, "queued": sorted(collector.pending), "searches": db.searches(),
-            "model": model_status(), "refresh_hours": db.refresh_hours(),
+            "model": model_status(), "refresh_start_hours": db.refresh_start_hours(),
             "description_analysis": db.get_state("description_analysis", {"enabled": LLM_ENABLED, "model": LLM_MODEL})}
 
 

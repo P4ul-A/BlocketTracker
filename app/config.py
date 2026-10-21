@@ -5,7 +5,6 @@ from pathlib import Path
 
 DATA_DIR = Path(os.getenv("DATA_DIR", "./data"))
 API_BASE = os.getenv("BLOCKET_API_URL", "https://blocket-api.se").rstrip("/")
-REFRESH_HOURS = max(0.25, float(os.getenv("REFRESH_HOURS", "6")))
 MAX_PAGES = max(1, min(50, int(os.getenv("MAX_PAGES", "50"))))
 DETAIL_LIMIT = max(0, int(os.getenv("DETAIL_LIMIT", "100")))
 REQUEST_DELAY = max(0.2, float(os.getenv("REQUEST_DELAY", "0.5")))
