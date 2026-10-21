@@ -55,3 +55,16 @@
 .llm-indicator:hover,.llm-indicator:focus{z-index:3}
 .llm-indicator::after{content:attr(aria-label);position:absolute;top:100%;right:0;width:max-content;max-width:220px;padding:8px 12px;border-radius:6px;background:var(--ink);color:white;font-size:12px;font-weight:400;line-height:1.5;box-shadow:0 3px 12px #0002;visibility:hidden;opacity:0;pointer-events:none}
 .llm-indicator:hover::after,.llm-indicator:focus::after{visibility:visible;opacity:1}
+
+/* Stars mark globally saved favourites without obscuring price highlights. */
+.favourite-button{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:36px;height:36px;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--white);color:var(--muted);font-size:25px;line-height:1;cursor:pointer}
+.favourite-button[aria-pressed="true"],.favourite-star{color:#886200}
+.favourite-button[aria-pressed="true"]{background:#fff6d8;border-color:#d8bd64}
+.favourite-button:hover{background:#fff6d8}
+.favourite-card{box-shadow:inset 4px 0 #d8bd64}
+.favourites-card{border-color:#d8bd64}
+.favourites-list{max-width:950px}
+
+/* Keep the star at the upper right, with estimate badges on a separate row below. */
+.listing-meta .favourite-button{margin-left:auto}
+.listing-price-badges{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin-top:6px}

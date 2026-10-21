@@ -313,3 +313,16 @@ is installed, and shows whether description analysis is enabled. Use **Check
 again** after starting Ollama or installing a model. Connection and analysis
 configuration still use the `LLM_URL`, `LLM_MODEL`, and `LLM_ENABLED` environment
 variables and require an app restart when changed.
+
+### Favourites
+
+Use the star on a result or listing page to save a car. The **Favourites** card
+on the home screen collects starred listings across searches, without duplicates.
+Favourites are stored in SQLite and survive refreshes, search edits and deletion;
+unstar a listing to remove it. The favourites page shows last-seen timestamps,
+since a saved advert may no longer be available.
+
+Select **Favourites first** on a search page to pin matching favourites above
+other results while preserving your selected sort order within each group.
+This option respects all current filters and is remembered per search in this
+browser. Uncheck it to return to the normal sort order.

@@ -33,7 +33,7 @@
 {% for key,label in fact_labels.items() %}<tr><th scope="row">{{ label }}</th>{% for value,title in [('', 'Any'),('yes','Yes'),('no','No'),('unknown','Unknown')] %}<td><label><input type="radio" name="finding_{{ key }}" value="{{ value }}" data-fact="{{ key }}" aria-label="{{ label }}: {{ title }}" {% if value == '' %}checked{% endif %}></label></td>{% endfor %}</tr>{% endfor %}
 </tbody></table></div><p id="analysis-status" class="small subtle" aria-live="polite"></p>
 </div>
-</details><label class="checkbox"><input type="checkbox" id="deals-filter"> Highlights only</label><label class="checkbox"><input type="checkbox" id="archived-filter"> Include not seen</label></div>
+</details><label class="checkbox"><input type="checkbox" id="favourites-first"> Favourites first</label><label class="checkbox"><input type="checkbox" id="deals-filter"> Highlights only</label><label class="checkbox"><input type="checkbox" id="archived-filter"> Include not seen</label></div>
 <div class="results-layout"><section><p id="results-note" class="small subtle"></p><div id="results" aria-live="polite"><div class="empty">Loading listings…</div></div></section><aside class="map-panel"><div id="map" aria-label="Car listing locations"></div><div class="map-caption"><span class="map-dot"></span> Listing <span class="map-dot deal"></span> Below estimate <span class="map-dot over-price"></span> Above estimate <span id="map-count"></span></div><p class="small subtle">Town-level fallback markers are approximate. Advert coordinates may also be approximate.</p></aside></div>
 </div>
 {% endblock %}

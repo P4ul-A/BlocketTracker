@@ -1,0 +1,1 @@
+<button type="button" class="favourite-button" data-favourite="{{ item.id }}" aria-pressed="{{ 'true' if item.favourite else 'false' }}" aria-label="{{ 'Remove from favourites' if item.favourite else 'Add to favourites' }}" title="{{ 'Remove from favourites' if item.favourite else 'Add to favourites' }}">{{ '★' if item.favourite else '☆' }}</button>

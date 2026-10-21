@@ -2,7 +2,7 @@
 {% block title %}{{ item.title }} · Blocket Tracker{% endblock %}
 {% block content %}
 <a class="back" href="/" onclick="if(document.referrer.startsWith(location.origin)){history.back();return false}">← Back to results</a>
-<div class="page-heading heading-row"><div><p class="eyebrow">{{ item.seller_type }} seller · {{ item.location or 'Location unavailable' }}</p><h1>{{ item.title }}</h1><p class="subtle">{{ item.variant }}</p></div><a class="button" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View on Blocket ↗</a></div>
+<div class="page-heading heading-row"><div><p class="eyebrow">{{ item.seller_type }} seller · {{ item.location or 'Location unavailable' }}</p><h1>{{ item.title }}</h1><p class="subtle">{{ item.variant }}</p></div><div class="actions">{% include 'favourite_button.html' %}<a class="button" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View on Blocket ↗</a></div></div>
 <div class="detail-layout"><div>
 {% if item.images %}<div class="gallery">{% for image in item.images[:12] %}<button type="button" class="gallery-preview" aria-haspopup="dialog" aria-controls="image-preview" aria-label="Preview photo {{ loop.index }}"><img src="{{ image }}" alt="{{ item.title }} photo {{ loop.index }}" loading="lazy" referrerpolicy="no-referrer"></button>{% endfor %}</div>
 <dialog id="image-preview" class="image-preview" aria-label="Photo preview">

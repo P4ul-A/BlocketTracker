@@ -65,6 +65,10 @@ def init():
                 listing_id TEXT PRIMARY KEY REFERENCES listings(id) ON DELETE CASCADE,
                 result TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS favourites (
+                listing_id TEXT PRIMARY KEY REFERENCES listings(id) ON DELETE CASCADE,
+                saved_at TEXT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS pending_search_updates (
                 search_id INTEGER PRIMARY KEY REFERENCES searches(id) ON DELETE CASCADE,
                 config TEXT NOT NULL
@@ -196,7 +200,8 @@ def save_listing(data, raw, detail=None):
 def listings(search_id, seller="all", archived=False):
     """Read matched adverts with model predictions, preserving unknown sellers."""
     with connect() as db:
-        rows = db.execute("""SELECT l.*,m.active,p.estimate,p.comparable_count,a.result AS analysis_result
+        rows = db.execute("""SELECT l.*,m.active,p.estimate,p.comparable_count,a.result AS analysis_result,
+            EXISTS(SELECT 1 FROM favourites f WHERE f.listing_id=l.id) AS favourite
             FROM search_listings m JOIN listings l ON l.id=m.listing_id
             LEFT JOIN predictions p ON p.listing_id=l.id
             LEFT JOIN description_analysis a ON a.listing_id=l.id
@@ -209,7 +214,7 @@ def listings(search_id, seller="all", archived=False):
         if seller != "all" and item["seller_type"] != seller:
             continue
         estimate = row["estimate"]
-        item.update(first_seen=row["first_seen"], last_seen=row["last_seen"], active=bool(row["active"]),
+        item.update(favourite=bool(row["favourite"]), first_seen=row["first_seen"], last_seen=row["last_seen"], active=bool(row["active"]),
                     estimate=estimate, comparable_count=row["comparable_count"],
                     discount=(1 - item["price"] / estimate) * 100 if estimate and item.get("price") else None)
         result.append(item)
@@ -219,3 +224,10 @@ def listings(search_id, seller="all", archived=False):
 def refresh_start_hours():
     """Return sorted daily start hours, defaulting legacy installations to midnight."""
     return sorted(set(get_state("settings", {}).get("refresh_start_hours", [0])))
+
+
+def favourite_ids():
+    """Return unique favourites, newest first, independent of saved searches."""
+    with connect() as connection:
+        return [row[0] for row in connection.execute(
+            "SELECT listing_id FROM favourites ORDER BY saved_at DESC, listing_id")]

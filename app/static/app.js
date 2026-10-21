@@ -24,6 +24,42 @@ function node(tag, text, className) {
   if (className) el.className = className;
   return el;
 }
+function favouriteButton(car) {
+  const button = node('button', car.favourite ? '★' : '☆', 'favourite-button');
+  button.type = 'button';
+  button.dataset.favourite = car.id;
+  button.setAttribute('aria-pressed', String(Boolean(car.favourite)));
+  button.title = car.favourite ? 'Remove from favourites' : 'Add to favourites';
+  button.setAttribute('aria-label', button.title);
+  return button;
+}
+
+// Delegate clicks so both server-rendered and refreshed cards share the same action.
+document.addEventListener('click', async event => {
+  const button = event.target.closest('[data-favourite]');
+  if (!button || button.disabled) return;
+  button.disabled = true;
+  try {
+    const result = await api(`/api/listings/${encodeURIComponent(button.dataset.favourite)}/favourite`, {
+      method: 'PUT', body: JSON.stringify({favourite: button.getAttribute('aria-pressed') !== 'true'})
+    });
+    button.textContent = result.favourite ? '★' : '☆';
+    button.setAttribute('aria-pressed', String(result.favourite));
+    button.title = result.favourite ? 'Remove from favourites' : 'Add to favourites';
+    button.setAttribute('aria-label', button.title);
+    button.closest('.listing-card')?.classList.toggle('favourite-card', result.favourite);
+    const favouritesList = button.closest('.favourites-list');
+    if (favouritesList && !result.favourite) {
+      button.closest('.listing-card').remove();
+      if (!favouritesList.querySelector('.listing-card')) {
+        favouritesList.append(node('div', 'No favourites yet. Use the star on a listing to save it here.', 'empty'));
+      }
+    }
+    document.dispatchEvent(new Event('favourite-changed'));
+  } catch (error) { toast(error.message); }
+  finally { button.disabled = false; }
+});
+
 document.querySelectorAll('[data-date]').forEach(el => {
   if (el.dataset.date) el.textContent = date(el.dataset.date);
 });
@@ -81,6 +117,16 @@ if (form) {
 const searchPage = document.querySelector('#search-page');
 if (searchPage) {
   const id = searchPage.dataset.id;
+  const favouritesFirst = document.querySelector('#favourites-first');
+  const favouritesPreference = `favourites-first-${id}`;
+  try { favouritesFirst.checked = localStorage.getItem(favouritesPreference) === 'true'; }
+  catch (_) { /* Sorting remains usable when browser storage is unavailable. */ }
+  favouritesFirst.addEventListener('change', () => {
+    try { localStorage.setItem(favouritesPreference, String(favouritesFirst.checked)); }
+    catch (_) { /* Keep this page's choice even if it cannot be persisted. */ }
+    load();
+  });
+  document.addEventListener('favourite-changed', () => load());
   let map, layers, firstBounds = true, loading = false, reloadPending = false, signature = '';
   const markers = new Map();
   if (window.L) {
@@ -100,6 +146,7 @@ if (searchPage) {
   function card(car) {
     const article = node('article', null, `listing-card${car.highlight ? ' highlight' : car.above_estimate ? ' over-estimate' : ''}`);
     article.id = `car-${car.id}`;
+    article.classList.toggle('favourite-card', Boolean(car.favourite));
     if (car.images.length) {
       const img = node('img', null, 'car-image');
       img.src = car.images[0]; img.alt = car.title; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
@@ -108,10 +155,13 @@ if (searchPage) {
     const body = node('div', null, 'listing-body');
     const meta = node('div', null, 'listing-meta');
     meta.append(node('span', `${car.seller_type} seller`));
-    if (car.highlight) meta.append(node('span', `${car.discount.toFixed(1)}% below estimate`, 'deal-badge'));
-    if (car.above_estimate) meta.append(node('span', `${Math.abs(car.discount).toFixed(1)}% above estimate`, 'deal-badge over-estimate-badge'));
-    if (!car.active) meta.append(node('span', 'Not seen in latest complete search', 'badge'));
+    meta.append(favouriteButton(car));
     body.append(meta);
+    const priceBadges = node('div', null, 'listing-price-badges');
+    if (car.highlight) priceBadges.append(node('span', `${car.discount.toFixed(1)}% below estimate`, 'deal-badge'));
+    if (car.above_estimate) priceBadges.append(node('span', `${Math.abs(car.discount).toFixed(1)}% above estimate`, 'deal-badge over-estimate-badge'));
+    if (!car.active) priceBadges.append(node('span', 'Not seen in latest complete search', 'badge'));
+    if (priceBadges.childNodes.length) body.append(priceBadges);
     const facts = {...(car.analysis?.status === 'ready' ? car.analysis.facts : {})};
     const labels = {drivable: 'Drivable', extra_tires: 'Additional tyres', winter_tires: 'Winter tyres', summer_tires: 'Summer tyres'};
     const findings = node('div', null, 'finding-badges');
@@ -180,6 +230,7 @@ if (searchPage) {
       });
       const [data, status] = await Promise.all([api(`/api/searches/${id}/listings?${params}`), api('/api/status')]);
       const {search, listings: cars, model} = data;
+      if (favouritesFirst.checked) cars.sort((a, b) => Number(b.favourite) - Number(a.favourite));
       renderModel(model, search);
       const analysis = status.description_analysis || {};
       document.querySelector('#analysis-status').textContent = analysis.enabled ? `Local LLM: ${analysis.model} · ${analysis.ready || 0} analyzed · ${analysis.pending || 0} pending${analysis.errors ? ` · ${analysis.errors} retrying` : ''}` : 'Description analysis disabled — configure the external Ollama connection.';

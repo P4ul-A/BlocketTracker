@@ -124,7 +124,7 @@ def require_search(search_id):
 @app.get("/")
 def home(request: Request):
     """Render the saved-search dashboard."""
-    return templates.TemplateResponse(request=request, name="home.html", context={"searches": db.searches(), "refresh_start_hours": db.refresh_start_hours()})
+    return templates.TemplateResponse(request=request, name="home.html", context={"searches": db.searches(), "refresh_start_hours": db.refresh_start_hours(), "favourite_count": len(db.favourite_ids())})
 
 
 class SettingsConfig(BaseModel):
@@ -193,6 +193,32 @@ async def listing_page(request: Request, listing_id: str):
     await request.app.state.collector.ensure_listing_details(listing_id)
     item = listing_detail(listing_id)
     return templates.TemplateResponse(request=request, name="listing.html", context={"item": item, "description_parts": description_spans(item), "price_chart": price_history_chart(item["history"])})
+
+
+@app.get("/favourites")
+def favourites_page(request: Request):
+    """Show starred adverts across searches, including retained observations."""
+    return templates.TemplateResponse(request=request, name="favourites.html", context={
+        "items": [listing_detail(listing_id) for listing_id in db.favourite_ids()]})
+
+
+class FavouriteConfig(BaseModel):
+    """Set a listing's global favourite state explicitly for repeatable writes."""
+
+    favourite: bool
+
+
+@app.put("/api/listings/{listing_id}/favourite")
+def save_favourite(listing_id: str, config: FavouriteConfig):
+    """Keep favourites across refreshes, search edits, and search deletion."""
+    with db.connect() as connection:
+        if not connection.execute("SELECT 1 FROM listings WHERE id=?", (listing_id,)).fetchone():
+            raise HTTPException(404, "Listing not found")
+        if config.favourite:
+            connection.execute("INSERT OR IGNORE INTO favourites VALUES(?,?)", (listing_id, db.now()))
+        else:
+            connection.execute("DELETE FROM favourites WHERE listing_id=?", (listing_id,))
+    return {"favourite": config.favourite}
 
 
 @app.get("/api/options")
@@ -302,11 +328,12 @@ def listing_detail(listing_id: str):
         row = connection.execute("SELECT * FROM listings WHERE id=?", (listing_id,)).fetchone()
         history = connection.execute("SELECT observed_at,price FROM price_history WHERE listing_id=? ORDER BY id", (listing_id,)).fetchall()
         analysis_row = connection.execute("SELECT result FROM description_analysis WHERE listing_id=?", (listing_id,)).fetchone()
+        favourite = connection.execute("SELECT 1 FROM favourites WHERE listing_id=?", (listing_id,)).fetchone()
         prediction = connection.execute("SELECT estimate,comparable_count FROM predictions WHERE listing_id=?", (listing_id,)).fetchone()
     if row is None:
         raise HTTPException(404, "Listing not found")
     return {**add_analysis(json.loads(row["data"]), json.loads(analysis_row[0]) if analysis_row else None), "first_seen": row["first_seen"], "last_seen": row["last_seen"],
-            "detail_at": row["detail_at"], "history": [dict(h) for h in history],
+            "detail_at": row["detail_at"], "favourite": bool(favourite), "history": [dict(h) for h in history],
             "estimate": prediction["estimate"] if prediction else None,
             "comparable_count": prediction["comparable_count"] if prediction else None}
 
