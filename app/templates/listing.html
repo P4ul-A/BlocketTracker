@@ -11,7 +11,7 @@
 </dialog>{% endif %}
 <section class="panel description-card" id="description-analysis" data-listing-id="{{ item.id }}" data-status="{{ item.analysis.status }}">
 {% set status = item.analysis.status %}
-{% set status_label = {'ready':'Analysis done. Highlighted text shows seller statements identified by the LLM and driving-denial rules; unmarked text is not verified.', 'pending':'Description analysis pending. Highlights will appear automatically.', 'error':'Description analysis unavailable; retrying automatically.', 'disabled':'Description analysis disabled.', 'no_description':'No description available to analyze.'}.get(status, 'Description analysis pending.') %}
+{% set status_label = {'ready':'Analysis done. Highlighted text shows extracted seller statements; unmarked text is not verified.', 'pending':'Description analysis pending. Highlights will appear automatically.', 'error':'Description analysis unavailable; retrying automatically.', 'disabled':'Description analysis disabled.', 'no_description':'No description available to analyze.'}.get(status, 'Description analysis pending.') %}
 <span class="analysis-indicator analysis-{{ status }}" tabindex="0" role="img" aria-label="{{ status_label }}{% if item.analysis.get('truncated') %} Only the first 12,000 characters were analyzed.{% endif %}" title="{{ status_label }}{% if item.analysis.get('truncated') %} Only the first 12,000 characters were analyzed.{% endif %}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{% if status == 'ready' %}<path d="m5 12 4 4L19 6"/>{% elif status == 'pending' %}<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>{% elif status == 'error' %}<path d="M12 5v9m0 4h.01"/>{% else %}<path d="M6 12h12"/>{% endif %}</svg>
 </span>
@@ -27,6 +27,6 @@
 <dialog id="finding-dialog" class="finding-dialog" aria-labelledby="finding-dialog-title">
 <div class="finding-dialog-heading"><h2 id="finding-dialog-title">Description finding</h2><button type="button" id="close-finding-dialog" class="text-button" aria-label="Close description finding">×</button></div>
 <div id="finding-dialog-content"></div>
-<p class="small subtle">Analysis uses {{ item.analysis.model }} and driving-denial rules. This is an extracted seller statement; check the original wording.</p>
+<p class="small subtle">Analysis uses {{ item.analysis.model }} and evidence rules. This is an extracted seller statement; check the original wording.</p>
 </dialog>
 {% endblock %}

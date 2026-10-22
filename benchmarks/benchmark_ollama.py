@@ -54,7 +54,9 @@ def main():
                     "version": client.get(args.url + "/api/version").json(),
                     "threads": LLM_THREADS, "prompt": prompt,
                     "description_module_sha256": hashlib.sha256(
-                        Path("app/description.py").read_bytes()).hexdigest()}
+                        Path("app/description.py").read_bytes()).hexdigest(),
+                    "tyre_module_sha256": hashlib.sha256(
+                        Path("app/tyres.py").read_bytes()).hexdigest()}
         output.with_suffix(".metadata.json").write_text(json.dumps(metadata, indent=2))
         for model in args.models:
             if all((model, row["id"]) in done for row in sample):
@@ -68,7 +70,7 @@ def main():
             warm_seconds = time.perf_counter() - started
             resident = {"warmup_seconds": warm_seconds,
                         "ps": client.get(args.url + "/api/ps").json()}
-            output.with_name(model.replace(":", "_") + ".resident.json").write_text(
+            output.with_name(output.stem + "." + model.replace(":", "_") + ".resident.json").write_text(
                 json.dumps(resident, indent=2))
             print(model, "warmup seconds", round(warm_seconds, 2), flush=True)
             for index, row in enumerate(sample, 1):

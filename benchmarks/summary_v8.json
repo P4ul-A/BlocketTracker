@@ -1,0 +1,145 @@
+{
+  "qwen3:1.7b": {
+    "requests": 60,
+    "errors": 0,
+    "mean_seconds": 1.9949086715176236,
+    "median_seconds": 1.6902759794975282,
+    "p95_seconds": 3.440183209000679,
+    "total_seconds": 119.69452029105742,
+    "scores": {
+      "all": {
+        "fields": {
+          "drivable": {
+            "correct": 60,
+            "n": 60,
+            "tp": 55,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 60,
+            "n": 60,
+            "tp": 18,
+            "fp": 0,
+            "fn": 0
+          },
+          "winter_tires": {
+            "correct": 60,
+            "n": 60,
+            "tp": 25,
+            "fp": 0,
+            "fn": 0
+          },
+          "summer_tires": {
+            "correct": 60,
+            "n": 60,
+            "tp": 20,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "exact_adverts": 60
+      },
+      "random": {
+        "fields": {
+          "drivable": {
+            "correct": 40,
+            "n": 40,
+            "tp": 39,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 40,
+            "n": 40,
+            "tp": 10,
+            "fp": 0,
+            "fn": 0
+          },
+          "winter_tires": {
+            "correct": 40,
+            "n": 40,
+            "tp": 15,
+            "fp": 0,
+            "fn": 0
+          },
+          "summer_tires": {
+            "correct": 40,
+            "n": 40,
+            "tp": 10,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "exact_adverts": 40
+      },
+      "challenge": {
+        "fields": {
+          "drivable": {
+            "correct": 17,
+            "n": 17,
+            "tp": 13,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 17,
+            "n": 17,
+            "tp": 7,
+            "fp": 0,
+            "fn": 0
+          },
+          "winter_tires": {
+            "correct": 17,
+            "n": 17,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0
+          },
+          "summer_tires": {
+            "correct": 17,
+            "n": 17,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "exact_adverts": 17
+      },
+      "long": {
+        "fields": {
+          "drivable": {
+            "correct": 3,
+            "n": 3,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 3,
+            "n": 3,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "winter_tires": {
+            "correct": 3,
+            "n": 3,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "summer_tires": {
+            "correct": 3,
+            "n": 3,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "exact_adverts": 3
+      }
+    },
+    "mismatches": []
+  }
+}

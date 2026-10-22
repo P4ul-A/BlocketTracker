@@ -1,0 +1,23 @@
+{
+  "counts": {
+    "qwen3:1.7b": 60,
+    "source_reconstructed": 180,
+    "unhighlighted_quotes": 0,
+    "qwen3.5:4b": 60,
+    "qwen3.5:2b": 60,
+    "live_schema_errors": 0,
+    "live_final_validation_exact": 60,
+    "detail_pages_rendered": 3
+  },
+  "final_source_sha256": {
+    "app/description.py": "9ce128942f8c12b081c20e246f7dfaa0a3c0df4a178d6af9e94af9cb546ca665",
+    "app/tyres.py": "e05ec0b38eeb898e111a37304790475ffafd7a9d97d7415d50d27f23b82582dc"
+  },
+  "note": "Labels were used to guide these fixes; these are development-sample results, not held-out accuracy. Fresh inference used the new prompt/schema; final rule refinements were revalidated on every saved response.",
+  "checks": {
+    "python_compile": "passed",
+    "git_diff_whitespace": "passed",
+    "javascript_syntax": "Node is not installed; unavailable",
+    "browser_interaction": "not exercised"
+  }
+}

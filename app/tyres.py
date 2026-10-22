@@ -8,13 +8,14 @@ unknown. These rules deliberately do not infer tyres from AWD or wheel bearings.
 import re
 
 
-WHEEL = r"(?:däck(?:en|et)?|hjul(?:en|et)?|tyres?|tires?|wheels?)"
+WHEEL = r"(?:(?:däck|hjul)uppsättning(?:ar)?|däck(?:en|et)?|hjul(?:en|et)?|tyres?|tires?|wheels?)"
 SEASON = r"(?:sommar|vinter|summer|winter)"
 PAID = (
     r"köp(?:a|as)?\s+till|tillköp|mot\s+(?:en\s+)?(?:extra\s+)?(?:kostnad|tillägg)|"
-    r"kostar\s+extra|extra\s+(?:kostnad|avgift)|säl[ j]?s\s+separat|"
-    r"(?:förmånliga|bra)\s+priser|extra\s+charge|additional\s+cost|sold\s+separately|"
-    r"(?:vid\s+köp\s+av|innehåller).*trygghetspaket|trygghetspaket.*innehåller"
+    r"kostar\s+extra|extra\s+(?:kostnad|avgift)|sälj(?:e)?s\s+separat|köp(?:a|as)?\s+separat|"
+    r"(?:förmånliga|bra)\s+(?:paket)?priser|extra\s+charge|additional\s+cost|sold\s+separately|"
+    r"(?:vid\s+köp\s+av|innehåller).*trygghetspaket|trygghetspaket.*innehåller|"
+    r"vid\s+paketering|rabatteras"
 )
 
 
@@ -25,8 +26,10 @@ def normalize_tyres(text):
                   "sommarhjul vinterhjul", text)
     text = re.sub(r"\bv\s*[-/]?\s*(?:och|&|o|/)\s*s\s*[- ]*" + WHEEL,
                   "vinterhjul sommarhjul", text)
-    text = re.sub(r"\b(sommar|vinter)\s*-?\s*(?:och|&|o|/)\s*(sommar|vinter)\s*[- ]*(däck|hjul)",
+    text = re.sub(r"\b(sommar|vinter)\s*-?\s*(?:och|samt|&|o|/)\s*(?:dubbade\s+|dubbfria\s+)?(sommar|vinter)\s*[- ]*(däck|hjul)",
                   r"\1\3 \2\3", text)
+    text = re.sub(r"\bsommar\s+(?:och|samt|&)\s+(dubbdäck|friktionsdäck)",
+                  r"sommarhjul \1", text)
     text = re.sub(r"\bs\s*-\s*(däck|hjul)", r"sommar\1", text)
     return re.sub(r"\bv\s*-\s*(däck|hjul)", r"vinter\1", text)
 
@@ -38,10 +41,18 @@ def tyre_clauses(sentence):
     together, but separate 'Sommarhjul ingår, vinterhjul kostar extra'.
     """
     text = normalize_tyres(sentence)
-    return re.split(
-        r"\b(?:men|but)\b|[,;]\s*(?=(?:(?:inga|utan|extra)\s+)?" + SEASON
-        + r"|inga\s+andra|extra\s+(?:uppsättning|set))"
-        + r"|\boch\s+(?=inga\s+" + SEASON + r")", text)
+    text = re.sub(r"\b(ingår|medföljer)\s+och\s+(?=" + SEASON + r")", r"\1, ", text)
+    parts = re.split(r"[,;]|\b(?:men|but)\b|\boch\s+(?=inga\s+" + SEASON + r")", text)
+    clauses = []
+    for part in parts:
+        part = part.strip()
+        qualifier = re.match(r"(?:använda\b|på\b|går\s+att\s+köpa|finns\s+att\s+köpa|"
+                             r"kostar\b|ingår\b|medföljer\b|mot\s+tillägg|\d[\d ]*\s*(?:kr|sek|:-))", part)
+        if qualifier and clauses and any(tyre_mentions(clauses[-1])) and not any(tyre_mentions(part)):
+            clauses[-1] += ", " + part
+        else:
+            clauses.append(part)
+    return clauses
 
 
 def tyre_mentions(clause):
@@ -79,6 +90,9 @@ def tyre_facts(sentences):
             no_other = bool(re.search(r"\b(?:inga\s+(?:andra|extra)|no\s+(?:other|extra))\s+" + WHEEL, clause))
             if not (winter or summer or additional or no_other):
                 continue
+            # A shared all-season set is not two separate seasonal inventories.
+            if re.search(r"\b(?:allround|åretrunt|året\s+runt|all[ -]season|samma\s+(?:däck|uppsättning))", clause):
+                continue
             quotes = [sentence]
             # A standalone following qualifier may complete a tyre inventory line.
             if index + 1 < len(sentences):
@@ -88,17 +102,19 @@ def tyre_facts(sentences):
                     clause += " " + following
                     quotes.append(sentences[index + 1])
             paid = bool(re.search(PAID, clause) or re.search(
-                r"\b" + WHEEL + r"\s*(?:på\s+fälg\s*)?[:=-]?\s*\d[\d ]*\s*(?:kr\b|sek\b|:-)", clause))
+                r"\b" + WHEEL + r"\s*(?:på\s+fälg\s*)?(?:kostar\s+|från\s+|[:=-]\s*)?"
+                + r"\d[\d ]*\s*(?:kr\b|sek\b|:-)", clause))
+            tyre_name = r"\b(?:" + SEASON + r"[ -]*)?" + WHEEL + r"\b"
             denied = bool(re.search(
                 r"\b(?:inga|inget|utan|no|without)\s+(?:\w+[ -]+){0,2}(?:" + SEASON + r"[ -]*)?" + WHEEL + r"\b"
-                + r"|\b(?:ingår|medföljer|inkluderas)\s+(?:inte|ej)\b"
-                + r"|\b(?:inte|ej)\s+(?:ingår|medföljer|inkluderade)\b"
-                + r"|\b(?:not\s+included|saknas)\b", clause))
+                + r"|" + tyre_name + r"\s*[:,]?\s*(?:(?:ingår|medföljer|inkluderas|finns)\s+(?:inte|ej)|saknas|not\s+included)\b"
+                + r"|\b(?:saknar|utan|(?:ingår|medföljer)\s+(?:inte|ej))\s+(?:några\s+)?" + tyre_name, clause))
             explicit_inclusion = bool(re.search(r"\b(?:ingår|medföljer|följer\s+med|included|levereras\s+med)\b", clause))
             uncertain = bool(re.search(
                 r"\b(?:erbjuder|kan\s+ordna|möjlighet\s+till|vid\s+köp|om\s+du|if\s+you|"
-                r"tidigare\s+ingick|hade\s+tidigare)\b|\?", clause))
-            # Do not interpret e.g. extra lights near a seasonal tyre as extra tyres.
+                r"tidigare\s+ingick|hade\s+tidigare|kommer\s+(?:att\s+)?behövas|"
+                r"behöver\s+(?:köpa|skaffa)|måste\s+köpas)\b|\?", clause))
+            # An unnamed 'extra set' alone need not refer to tyres.
             if not (generic or winter or summer):
                 continue
             if no_other:
@@ -129,7 +145,12 @@ def tyre_facts(sentences):
     winter, summer = facts["winter_tires"], facts["summer_tires"]
     if winter["value"] is True and summer["value"] is True:
         quotes = list(dict.fromkeys(winter["evidence_sentences"] + summer["evidence_sentences"]))
-        facts["extra_tires"] = {"value": True, "evidence": "\n".join(quotes),
+        excludes_others = any(not value and reason == "Seller explicitly excludes other tyre sets."
+                              for value, _, reason in findings["extra_tires"])
+        if excludes_others:
+            quotes = list(dict.fromkeys(quotes + facts["extra_tires"]["evidence_sentences"]))
+        facts["extra_tires"] = {"value": None if excludes_others else True, "evidence": "\n".join(quotes),
                                 "evidence_sentences": quotes, "source": "rule",
-                                "reason": "Both summer and winter tyre sets are included."}
+                                "reason": ("Conflicting tyre statements; inclusion is unknown." if excludes_others
+                                           else "Both summer and winter tyre sets are included.")}
     return facts

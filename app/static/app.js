@@ -6,7 +6,9 @@ document.querySelector('#back-to-top')?.addEventListener('click', () => {
   window.scrollTo({top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
 });
 const money = value => value == null ? 'Unavailable' : `${Math.round(value).toLocaleString('sv-SE')} SEK`;
-const date = value => value ? new Date(value).toLocaleString('en-GB', {timeZone: 'Europe/Stockholm'}) : 'Not yet';
+const date = value => value ? new Date(value).toLocaleString('en-GB', {
+  timeZone: 'Europe/Stockholm', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+}) : 'Not yet';
 const toast = message => {
   const el = document.querySelector('#toast');
   el.textContent = message;
@@ -323,7 +325,7 @@ if (findingDialog) {
         section.append(node('h3', decision.label));
         section.append(node('p', decision.key === 'drivable' ? (decision.value ? 'Decision: Drivable' : 'Decision: Not drivable') : (decision.value ? 'Decision: Yes' : 'Decision: No — explicitly denied'), 'finding-decision-value'));
         section.append(node('blockquote', decision.evidence));
-        section.append(node('p', decision.source === 'rule' ? 'Recognized from an explicit driving denial.' : 'Selected by the language model.', 'small subtle'));
+        section.append(node('p', decision.reason || (decision.source === 'rule' ? 'Recognized from an explicit driving denial.' : 'Selected by the language model.'), 'small subtle'));
         content.append(section);
       });
       findingDialog.showModal();
@@ -452,7 +454,7 @@ if (taskLog) {
         link.href = `/searches/${group.id}`;
         heading.append(link);
       } else heading.textContent = group.name;
-      if (group.id != null) heading.append(node('span', `Search #${group.id}${group.exists ? '' : ' · Deleted'}`, 'small subtle'));
+      if (group.id != null && !group.exists) heading.append(node('span', 'Deleted', 'small subtle'));
       section.append(heading);
       if (group === shared) {
         section.append(node('p', 'Startup model training and saved-listing LLM backfills use the shared listing pool across searches; they have no single search owner.', 'small subtle'));
@@ -468,23 +470,31 @@ if (taskLog) {
         details.open = expanded.has(task.id) ? expanded.get(task.id) : active;
         details.addEventListener('toggle', () => expanded.set(task.id, details.open));
         const summary = node('summary');
-        summary.append(node('strong', `${task.search_id == null ? task.name : 'Search refresh'} · #${task.id}`), badge(task.status));
+        summary.append(node('strong', task.search_id == null ? task.name : 'Search refresh'), badge(task.status));
         const elapsed = node('span', task.started_at ? 'Elapsed ' : 'In queue ', 'task-total');
         elapsed.append(timing(task.started_at ? task.duration_seconds : task.queue_seconds, active));
         summary.append(elapsed);
         details.append(summary);
         if (task.search_id != null && task.name !== group.name) details.append(node('p', `Search name at refresh: ${task.name}`, 'small subtle'));
-        details.append(node('p', `Queued ${date(task.created_at)}${task.started_at ? ` · Started ${date(task.started_at)}` : ''}${task.finished_at ? ` · Finished ${date(task.finished_at)}` : ''}`, 'small subtle'));
-        if (task.started_at) details.append(node('p', `Initial queue wait: ${duration(task.queue_seconds)}`, 'small subtle'));
+        details.append(node('p', `Queued ${date(task.created_at)}${task.started_at ? ` · Started ${date(task.started_at)} · Queue wait: ${duration(task.queue_seconds)}` : ''}${task.finished_at ? ` · Finished ${date(task.finished_at)}` : ''}`, 'small subtle'));
         if (task.message) details.append(node('p', task.message, 'task-message'));
-        const list = node('ol', null, 'task-steps');
+        const list = node('ul', null, 'task-steps');
         task.steps.forEach(step => {
           const item = node('li');
           const heading = node('div', null, 'task-step-heading');
-          heading.append(node('strong', step.label), badge(step.status), timing(step.duration_seconds, Boolean(step.active_at)));
+          const info = [];
+          if (step.started_at) info.push(`Started ${date(step.started_at)}`);
+          if (step.finished_at) info.push(`Finished ${date(step.finished_at)}`);
+          if (step.message) info.push(step.message);
+          if (step.name === 'analysis' && active && ['running', 'waiting'].includes(step.status)) {
+            const speed = step.listings_per_minute == null ? 'Calculating listings/min…' : `${step.listings_per_minute.toFixed(1)} listings/min`;
+            const eta = step.eta_at ? `Est. analysis finish: ${date(step.eta_at)}` : step.listings_per_minute == null ? 'ETA available after the first completed listing' : 'Analysis done';
+            info.push(speed, eta);
+          }
+          heading.append(node('strong', step.label), badge(step.status),
+            node('span', info.join(' · '), 'small subtle task-step-info'),
+            timing(step.duration_seconds, Boolean(step.active_at)));
           item.append(heading);
-          if (step.started_at) item.append(node('p', `Started ${date(step.started_at)}${step.finished_at ? ` · Finished ${date(step.finished_at)}` : ''}`, 'small subtle'));
-          if (step.message) item.append(node('p', step.message, 'small subtle'));
           list.append(item);
         });
         details.append(list);

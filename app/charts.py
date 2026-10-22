@@ -43,7 +43,7 @@ def price_history_chart(history, last_seen=None):
             "x": 254 if start == end else 78 + (observed.timestamp() - start) / (end - start) * 352,
             "y": 204 - (price - low) / (high - low) * 180,
             "date": local.strftime("%d/%m/%Y"),
-            "time": local.strftime("%H:%M:%S"),
+            "time": local.strftime("%H:%M"),
             "price": f"{price:,.0f}".replace(",", " "),
         })
     path = f'M {points[0]["x"]} {points[0]["y"]}'

@@ -1,5 +1,9 @@
 # Ollama benchmark on cached Blocket descriptions
 
+The initial version-seven benchmark below is retained for comparison. The
+subsequent extraction fixes and version-eight results are documented in
+[extraction_v8.md](extraction_v8.md).
+
 Measured locally on 2026-10-22, on an Apple M2 Pro (10 CPU cores, 16 GB
 unified memory). No Blocket requests or production database writes are made.
 Production configuration is unchanged.

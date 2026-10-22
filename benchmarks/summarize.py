@@ -2,6 +2,7 @@
 
 import json
 import math
+import argparse
 from pathlib import Path
 import statistics
 
@@ -9,8 +10,12 @@ import statistics
 def main():
     """Write aggregate scores and preserve every mismatch for source review."""
     directory = Path(__file__).resolve().parent
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--results", type=Path, default=directory / "results.jsonl")
+    parser.add_argument("--output", type=Path, default=directory / "summary.json")
+    args = parser.parse_args()
     labels = json.loads((directory / "labels.json").read_text())["labels"]
-    results = [json.loads(line) for line in (directory / "results.jsonl").read_text().splitlines()]
+    results = [json.loads(line) for line in args.results.read_text().splitlines()]
     summary = {}
     for model in dict.fromkeys(row["model"] for row in results):
         rows = [row for row in results if row["model"] == model]
@@ -37,7 +42,7 @@ def main():
             "mean_seconds": statistics.mean(times), "median_seconds": statistics.median(times),
             "p95_seconds": times[math.ceil(len(times) * 0.95) - 1],
             "total_seconds": sum(times), "scores": scores, "mismatches": mismatches}
-    (directory / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2))
+    args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2))
     for model, value in summary.items():
         print(model, json.dumps({key: val for key, val in value.items() if key not in {"mismatches", "scores"}}))
         for group, score in value["scores"].items():

@@ -6,7 +6,7 @@ active batches; the parent duration includes queueing between stages and retries
 """
 
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 
 from . import db
@@ -145,7 +145,7 @@ def backfill_task():
 def finish_analysis(task_id, pending, errors, total, error=""):
     """Publish LLM progress and close a search once its final retraining has ended."""
     done = total - pending - errors
-    message = f"{done}/{total} descriptions ready"
+    message = f"{done}/{total} done"
     if pending or errors:
         update_step(task_id, "analysis", "waiting",
                     message + (f"; {errors} awaiting retry. {error}" if errors else ""))
@@ -166,7 +166,13 @@ def log():
 
     Search IDs and snapshotted run names retain deleted searches' history. System
     tasks have no search owner because their work uses the shared listing pool.
+    Live analysis counts use current descriptions so progress updates per listing,
+    even while a batch is running. Finished runs retain their saved counts.
+    Speed excludes cached results from before analysis started. The finish estimate
+    includes elapsed batch pauses and retraining, assuming the same overall pace.
     """
+    from .description import public_analysis
+
     now = timestamp()
     with db.connect() as connection:
         searches = [{"id": row["id"], "name": json.loads(row["config"])["name"]}
@@ -178,11 +184,42 @@ def log():
         placeholders = ",".join("?" for _ in ids)
         steps = (connection.execute(f"SELECT * FROM task_steps WHERE task_id IN ({placeholders}) ORDER BY task_id,position",
                                     ids).fetchall() if ids else [])
+        members = connection.execute("""SELECT m.task_id,l.data,a.result FROM task_listings m
+            JOIN task_runs t ON t.id=m.task_id
+            JOIN listings l ON l.id=m.listing_id
+            LEFT JOIN description_analysis a ON a.listing_id=l.id
+            WHERE t.finished_at IS NULL""").fetchall()
+    progress = {}
+    for row in members:
+        counts = progress.setdefault(row["task_id"], {"done": 0, "total": 0, "completed_at": []})
+        analysis = public_analysis(json.loads(row["data"]), json.loads(row["result"]) if row["result"] else None)
+        status = analysis["status"]
+        if status not in {"no_description", "disabled"}:
+            counts["total"] += 1
+            counts["done"] += status == "ready"
+        if status == "ready" and analysis.get("updated_at"):
+            counts["completed_at"].append(datetime.fromisoformat(analysis["updated_at"]))
     grouped = {}
     for row in steps:
         step = dict(row)
         step["label"] = STEP_LABELS[step["name"]]
         step["duration_seconds"] += seconds(step["active_at"], now) if step["active_at"] else 0
+        if step["name"] == "analysis" and step["task_id"] in progress:
+            counts = progress[step["task_id"]]
+            # Replace the saved batch count, keeping listing details and errors.
+            summary, _, detail = step["message"].partition("; ")
+            if not summary.endswith((" descriptions ready", " done")):
+                detail = step["message"]
+            step["message"] = f"{counts['done']}/{counts['total']} done" + (f"; {detail}" if detail else "")
+            if step["started_at"] and step["status"] in {"running", "waiting"}:
+                started = datetime.fromisoformat(step["started_at"])
+                processed = sum(completed >= started for completed in counts["completed_at"])
+                if processed and step["duration_seconds"] > 0:
+                    step["listings_per_minute"] = processed * 60 / step["duration_seconds"]
+                    remaining = counts["total"] - counts["done"]
+                    if remaining:
+                        estimate = remaining * seconds(step["started_at"], now) / processed
+                        step["eta_at"] = (datetime.fromisoformat(now) + timedelta(seconds=estimate)).isoformat()
         grouped.setdefault(step["task_id"], []).append(step)
     result = []
     for row in runs:

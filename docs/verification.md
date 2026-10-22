@@ -1,5 +1,27 @@
 # Implementation verification
 
+## Tyre inclusion and multiple evidence sentences — 22 October 2026
+
+Extraction version eight adds field-specific tyre inclusion rules, extra-charge
+and negation checks, seasonal abbreviation handling, and independently highlighted
+source sentences. Deterministic inventory scanning recovers missed facts; raw
+model selections, decision reasons, and validation outcomes remain reviewable.
+The configured model and existing drivability behavior are unchanged.
+
+Replayed the three-model benchmark's 180 recorded responses through the updated
+validator. All models matched all 60 development labels, with no incorrect tyre
+inclusion findings. A fresh Qwen3 1.7B run completed 60 requests using the new
+multi-sentence schema without request/schema errors and matched all labels after
+final validation. These labels guided implementation, so this is not held-out
+accuracy. See `benchmarks/extraction_v8.md` for results and limitations.
+
+Checked original-text reconstruction and quote highlighting on all 180 replays;
+rendered three real detail pages for multiple inventory lines, separately priced
+winter wheels, and AWD-only faults. Browser interaction was not exercised.
+Production data and notebooks were not edited, and no automated tests were added.
+Old findings refresh from cached descriptions after the updated app restarts,
+provided background LLM analysis is enabled.
+
 ## Whole car links and missed Swedish driving denials — 22 October 2026
 
 Extended the native title link across car cards in search results and favourites.

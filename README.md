@@ -276,13 +276,27 @@ can combine Any/Yes/No/Unknown choices across multiple findings. Filters apply l
 do not restrict the broader training sample. A strict “no” filter requires an explicit
 negative statement; for other facts, select “unknown” to find adverts without a supported assertion.
 
-The extractor receives numbered source sentences and selects a supporting sentence
-ID for each decision. It returns null for missing driving information; the
+The extractor receives numbered source sentences and selects up to four supporting
+sentence IDs for each decision. It returns null for missing driving information; the
 application applies the assumed Yes default after validation. Evidence comes
-directly from that source sentence, preventing stitched or rewritten quotations.
-Structured output and related wording are checked. Drivability also requires a
+directly from the original sentences, preventing rewritten quotations. Each
+supporting sentence is highlighted separately, including nonadjacent inventory
+lines used together to establish an additional tyre set.
+Structured output and field-specific evidence are checked. Drivability also requires a
 capability statement matching the selected yes/no value; words such as
 `körsträcka` (mileage) do not qualify.
+
+Tyre-inclusion rules scan the description independently of model selections.
+They recognize ordinary inventory lists, spaced seasonal names, `S- och V-hjul`,
+`S&V-däck`, `dubbdäck`, and `friktionsdäck`. Included summer and winter sets
+establish an additional set even when listed on separate lines. Offers such as
+`köpa till`, `mot tillägg`, separately priced sets, and conditional paid packages
+are excluded. Each seasonal offer is assessed separately; an optional winter set
+does not negate included summer wheels. AWD, wheel bearings, and tyre-pressure
+equipment do not establish tyre inventory. Contradictory seasonal statements and
+unrecognized wording remain unknown. Shared all-season tyres do not establish two
+sets. Quotes and decision reasons are retained with rule provenance; the cache
+also records whether a model selection was validated, overridden, or rejected.
 
 Explicit driving-denial rules scan the same original sentences and override a
 missed or contradictory LLM selection. They recognize forms such as `Startar ej`,
@@ -291,7 +305,9 @@ gearbox, an engine that will not turn over, and mandatory towing. Historical
 clauses and auxiliary-heater starting faults are excluded. A refusal to allow a
 test drive alone does not establish non-drivability. The finding popup identifies
 whether the decision came from a rule or the LLM; raw model selections remain
-available in the cache for debugging.
+available in the cache for debugging. Extraction version eight invalidates old
+findings; after restarting the app, enabled background analysis refreshes them
+using the existing cached descriptions.
 
 Swedish is analyzed directly, without a separate translation pass: translating
 would add inference time and another opportunity to lose a negation, and would
@@ -352,7 +368,12 @@ without a link. Startup training and saved-listing LLM backfills appear under
 Each search refresh has **Listing collection**,
 **Training price model**, **LLM analysis**, and **Retraining model** underneath.
 Collection includes both purchase listings and comparables. Running stages have
-live timers; waiting stages show LLM progress and retry errors. Expand a finished
+live timers; LLM analysis shows **completed/total done** while running or waiting,
+alongside listing details and retry errors. Active analysis also shows listings
+per minute and an estimated finish time after the first completed listing.
+Speed uses active analysis time and excludes previously cached results; the
+finish estimate includes batch pauses and retraining at the observed pace.
+Expand a finished
 task to see its outcome, start/end times, queue wait, and time spent in each stage.
 The log refreshes every five seconds and preserves expanded entries.
 
