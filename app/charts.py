@@ -5,11 +5,13 @@ from math import isfinite
 from zoneinfo import ZoneInfo
 
 
-def price_history_chart(history):
-    """Return dated points, axis ticks and a step path, or None for no prices.
+def price_history_chart(history, last_seen=None):
+    """Return dated points, axis ticks and a smooth path, or None for no prices.
 
-    Horizontal spacing reflects elapsed time. Steps hold each observed price
-    until the next observation; they do not imply continuous monitoring.
+    Horizontal spacing reflects elapsed time. Cubic curves join observations
+    without overshooting their prices; intermediate prices are illustrative.
+    History stores changes only, so last_seen extends an unchanged price to its
+    latest confirmed sighting. Never extend beyond a missing-price observation.
     """
     observations = []
     for change in history:
@@ -21,6 +23,13 @@ def price_history_chart(history):
     observations.sort(key=lambda observation: observation[0])
     if not observations:
         return None
+
+    if last_seen:
+        seen = datetime.fromisoformat(last_seen)
+        last_change = max(datetime.fromisoformat(change["observed_at"]) for change in history)
+        observed, price = observations[-1]
+        if seen > observed and observed == last_change:
+            observations.append((seen, price))
 
     start, end = observations[0][0].timestamp(), observations[-1][0].timestamp()
     prices = [price for _, price in observations]
@@ -38,8 +47,9 @@ def price_history_chart(history):
             "price": f"{price:,.0f}".replace(",", " "),
         })
     path = f'M {points[0]["x"]} {points[0]["y"]}'
-    for point in points[1:]:
-        path += f' H {point["x"]} V {point["y"]}'
+    for previous, point in zip(points, points[1:]):
+        middle = (previous["x"] + point["x"]) / 2
+        path += f' C {middle} {previous["y"]}, {middle} {point["y"]}, {point["x"]} {point["y"]}'
     ticks = [{"y": 204 - tick * 45,
               "label": f"{low + (high - low) * tick / 4:,.0f}".replace(",", " ")}
              for tick in range(5)]

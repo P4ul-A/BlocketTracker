@@ -27,7 +27,7 @@ def connect():
 
 
 def init():
-    """Initialize tables and migrate legacy mileage values to kilometres once."""
+    """Initialize tables and upgrade existing databases before workers start."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     with connect() as db:
         db.execute("PRAGMA journal_mode=WAL")
@@ -73,7 +73,26 @@ def init():
                 search_id INTEGER PRIMARY KEY REFERENCES searches(id) ON DELETE CASCADE,
                 config TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS task_runs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, search_id INTEGER, name TEXT NOT NULL,
+                kind TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'queued',
+                created_at TEXT NOT NULL, started_at TEXT, finished_at TEXT, updated_at TEXT NOT NULL,
+                message TEXT NOT NULL DEFAULT ''
+            );
+            CREATE TABLE IF NOT EXISTS task_steps (
+                task_id INTEGER REFERENCES task_runs(id) ON DELETE CASCADE,
+                name TEXT NOT NULL, position INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'waiting',
+                started_at TEXT, finished_at TEXT, active_at TEXT,
+                duration_seconds REAL NOT NULL DEFAULT 0, message TEXT NOT NULL DEFAULT '',
+                PRIMARY KEY(task_id, name)
+            );
+            CREATE TABLE IF NOT EXISTS task_listings (
+                task_id INTEGER REFERENCES task_runs(id) ON DELETE CASCADE,
+                listing_id TEXT REFERENCES listings(id) ON DELETE CASCADE,
+                PRIMARY KEY(task_id, listing_id)
+            );
         """)
+        migrate_task_timestamps(db)
         if db.execute("PRAGMA user_version").fetchone()[0] < 2:
             migrate_mileage_to_km(db)
             db.execute("PRAGMA user_version=2")
@@ -93,6 +112,21 @@ def init():
         pending = [row[0] for row in db.execute("SELECT search_id FROM pending_search_updates")]
     for search_id in pending:
         apply_pending_search_update(search_id)
+
+
+def migrate_task_timestamps(db):
+    """Add the task heartbeat column used to recover interrupted runs.
+
+    Older task logs lack this column. Preserve their history and use the latest
+    recorded run or stage activity, rather than counting downtime as work.
+    """
+    columns = {row["name"] for row in db.execute("PRAGMA table_info(task_runs)")}
+    if "updated_at" not in columns:
+        db.execute("ALTER TABLE task_runs ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''")
+        db.execute("""UPDATE task_runs SET updated_at=MAX(
+            COALESCE(finished_at,created_at), COALESCE(started_at,created_at),
+            COALESCE((SELECT MAX(COALESCE(finished_at,active_at,started_at))
+                      FROM task_steps WHERE task_id=task_runs.id),created_at))""")
 
 
 def apply_pending_search_update(search_id):

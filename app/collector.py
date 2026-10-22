@@ -9,11 +9,11 @@ from zoneinfo import ZoneInfo
 
 import httpx
 
-from . import db, model
+from . import db, model, tasks as task_log
 from .blocket import BlocketClient, matches, normalize
 from .vehicles import model_key
 from .description import DescriptionAnalyzer
-from .config import DETAIL_LIMIT, GEOCODING, GEOCODER_USER_AGENT, GEOCODER_URL
+from .config import DETAIL_LIMIT, GEOCODING, GEOCODER_USER_AGENT, GEOCODER_URL, LLM_ENABLED
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,7 @@ class Collector:
     def __init__(self):
         self.queue = asyncio.Queue()
         self.pending = set()
+        self.task_ids = {}
         self.running = None
         self.detail_lock = asyncio.Lock()
         self.api = BlocketClient()
@@ -35,6 +36,11 @@ class Collector:
         """Coalesce duplicate refresh requests, returning whether one was queued."""
         if search_id in self.pending or self.running == search_id:
             return False
+        with db.connect() as connection:
+            row = connection.execute("SELECT config FROM searches WHERE id=?", (search_id,)).fetchone()
+        if row is None:
+            return False
+        self.task_ids[search_id] = task_log.create(json.loads(row["config"])["name"], search_id)
         self.pending.add(search_id)
         self.queue.put_nowait(search_id)
         return True
@@ -149,11 +155,15 @@ class Collector:
         db.save_listing(car, raw, fresh_detail)
         return car, warning
 
-    async def refresh(self, search_id):
+    async def refresh(self, search_id, task_id=None):
         """Collect purchase matches and independent comparables; preserve partial results."""
         search = db.get_search(search_id)
         if not search:
+            if task_id:
+                task_log.finish(task_id, "skipped", "Search no longer exists.")
             return
+        task_id = task_id or task_log.create(search["config"]["name"], search_id)
+        task_log.update_step(task_id, "collection", "running", "Collecting purchase listings and comparables.")
         config = search["config"]
         started = db.now()
         with db.connect() as connection:
@@ -163,17 +173,20 @@ class Collector:
         warnings = set()
         summaries = []
         budget = [DETAIL_LIMIT]
+        collected_ids = set()
         try:
             purchase_docs = {}
             async for docs, complete, summary in self.api.pages(config):
                 for raw in docs:
                     purchase_docs[str(raw["id"])] = raw
                     car, _ = await self.store(raw)
+                    collected_ids.add(car["id"])
                     if matches(car, config):
                         seen_matches.add(car["id"])
                         with db.connect() as connection:
                             connection.execute("INSERT OR REPLACE INTO search_listings VALUES(?,?,1)", (search_id, car["id"]))
                 summaries = ["Purchase search: " + summary]
+                task_log.update_step(task_id, "collection", "running", summaries[0])
             # Fill missing details before refreshing old ones, across all pages.
             with db.connect() as connection:
                 detail_dates = {row["id"]: row["detail_at"] or "" for row in
@@ -193,15 +206,21 @@ class Collector:
                 for raw in docs:
                     # Purchase adverts already stored with richer location/details.
                     if str(raw["id"]) not in seen_matches:
-                        await self.store(raw)
+                        car, _ = await self.store(raw)
+                        collected_ids.add(car["id"])
                 broad_summary = "Comparables: " + summary
+                task_log.update_step(task_id, "collection", "running", broad_summary)
             summaries.append(broad_summary)
             if not broad_complete:
                 warnings.add("Comparable collection is incomplete; estimates use the available sample.")
             if not complete:
                 warnings.add("Purchase collection is incomplete; previous matches have been retained.")
-            await asyncio.to_thread(model.train)
             status = "complete" if complete and broad_complete else "partial"
+            message = " ".join(summaries + sorted(warnings))
+            task_log.update_step(task_id, "collection", status, message)
+            task_log.attach_listings(task_id, collected_ids)
+            with task_log.work([task_id], "training", "Training on the shared listing pool."):
+                await asyncio.to_thread(model.train)
             with db.connect() as connection:
                 # A failed/partial refresh never archives previous matches.
                 if complete and broad_complete:
@@ -210,11 +229,17 @@ class Collector:
                                            [(search_id, item) for item in seen_matches])
                 connection.execute("UPDATE searches SET status=?,last_success=?,message=? WHERE id=?",
                                    (status, db.now() if complete else search["last_success"],
-                                    " ".join(summaries + sorted(warnings)), search_id))
+                                    message, search_id))
+            if not LLM_ENABLED:
+                task_log.update_step(task_id, "analysis", "skipped", "LLM analysis is disabled.")
+                task_log.update_step(task_id, "retraining", "skipped", "LLM analysis is disabled.")
+                task_log.finish(task_id, status, message)
         except asyncio.CancelledError:
+            task_log.finish(task_id, "interrupted", "Search refresh stopped before completion.")
             raise
         except Exception as error:
             logger.exception("Search %s refresh failed", search_id)
+            task_log.finish(task_id, "error", f"{type(error).__name__}: {str(error)[:400]}")
             with db.connect() as connection:
                 connection.execute("UPDATE searches SET status='error',message=? WHERE id=?",
                     (f"Refresh failed: {type(error).__name__}: {str(error)[:400]}. Partial observations were retained; retry available.", search_id))
@@ -228,7 +253,7 @@ class Collector:
             self.pending.discard(search_id)
             self.running = search_id
             try:
-                await self.refresh(search_id)
+                await self.refresh(search_id, self.task_ids.pop(search_id))
             finally:
                 self.running = None
                 if db.apply_pending_search_update(search_id):

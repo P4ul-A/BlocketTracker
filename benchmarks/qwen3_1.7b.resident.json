@@ -1,0 +1,7 @@
+{
+  "warmup_seconds": 1.38,
+  "observed_resident_bytes": 1988425154,
+  "observed_context_length": 8192,
+  "runner": "llamacpp",
+  "note": "Warmup rounded from benchmark stdout; resident figures observed via /api/ps during measured inference."
+}

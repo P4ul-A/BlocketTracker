@@ -6,8 +6,8 @@
 <div class="favourites-list">
 {% for item in items %}
 <article class="listing-card favourite-card">
-{% if item.images %}<a href="/listings/{{ item.id }}"><img class="car-image" src="{{ item.images[0] }}" alt="{{ item.title }}" loading="lazy" referrerpolicy="no-referrer"></a>{% else %}<div class="car-image no-image">No photo</div>{% endif %}
-<div class="listing-body"><div class="listing-meta"><span>{{ item.seller_type }} seller</span>{% include 'favourite_button.html' %}</div><h3><a href="/listings/{{ item.id }}">{{ item.title }}</a></h3><p>{{ item.year or 'Year unknown' }} · {{ item.mileage if item.mileage is not none else 'Unknown' }} km · {{ item.fuel }}</p><div class="listing-price">{{ '{:,.0f}'.format(item.price).replace(',', ' ') ~ ' SEK' if item.price is not none else 'Unavailable' }}</div><p>{{ item.location or 'Location unavailable' }}</p><p>Last seen <time data-date="{{ item.last_seen }}">{{ item.last_seen }}</time></p></div>
+{% if item.images %}<img class="car-image" src="{{ item.images[0] }}" alt="{{ item.title }}" loading="lazy" referrerpolicy="no-referrer">{% else %}<div class="car-image no-image">No photo</div>{% endif %}
+<div class="listing-body"><div class="listing-meta"><span>{{ item.seller_type }} seller</span>{% include 'favourite_button.html' %}</div><h3><a class="listing-link" href="/listings/{{ item.id }}">{{ item.title }}</a></h3><p>{{ item.year or 'Year unknown' }} · {{ item.mileage if item.mileage is not none else 'Unknown' }} km · {{ item.fuel }}</p><div class="listing-price">{{ '{:,.0f}'.format(item.price).replace(',', ' ') ~ ' SEK' if item.price is not none else 'Unavailable' }}</div><p>{{ item.location or 'Location unavailable' }}</p><p>Last seen <time data-date="{{ item.last_seen }}">{{ item.last_seen }}</time></p></div>
 </article>
 {% else %}<div class="empty">No favourites yet. Use the star on a listing to save it here.</div>{% endfor %}
 </div>

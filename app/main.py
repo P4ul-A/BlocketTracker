@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, model_validator
 
-from . import db, model
+from . import db, model, tasks as task_log
 from .charts import price_history_chart
 from .collector import Collector
 from .vehicles import vehicle_group
@@ -76,7 +76,15 @@ class SearchConfig(BaseModel):
 async def lifespan(app):
     """Initialize persistence and own the lifecycle of the single collection worker."""
     db.init()
-    await asyncio.to_thread(model.train)
+    task_log.interrupt_unfinished()
+    startup_task = task_log.create("Startup price model", kind="startup", steps=("training",))
+    try:
+        with task_log.work([startup_task], "training"):
+            await asyncio.to_thread(model.train)
+    except BaseException as error:
+        task_log.finish(startup_task, "error", f"{type(error).__name__}: {str(error)[:240]}")
+        raise
+    task_log.finish(startup_task)
     collector = Collector()
     app.state.collector = collector
     tasks = [asyncio.create_task(collector.worker()), asyncio.create_task(collector.scheduler()),
@@ -88,6 +96,7 @@ async def lifespan(app):
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
         await collector.close()
+        task_log.interrupt_unfinished(restarted=False)
 
 
 app = FastAPI(title="Blocket Tracker", lifespan=lifespan)
@@ -141,6 +150,12 @@ def settings_page(request: Request):
         "llm_model": LLM_MODEL, "llm_url": LLM_URL})
 
 
+@app.get("/api/settings/tasks")
+def task_history():
+    """Expose active searches and the most recent 50 completed task timings."""
+    return task_log.log()
+
+
 @app.put("/api/settings")
 def save_settings(settings: SettingsConfig):
     """Save daily start hours for the scheduler's next minute check."""
@@ -192,7 +207,7 @@ async def listing_page(request: Request, listing_id: str):
     """Refresh stale details on demand, then render the advert and price history."""
     await request.app.state.collector.ensure_listing_details(listing_id)
     item = listing_detail(listing_id)
-    return templates.TemplateResponse(request=request, name="listing.html", context={"item": item, "description_parts": description_spans(item), "price_chart": price_history_chart(item["history"])})
+    return templates.TemplateResponse(request=request, name="listing.html", context={"item": item, "description_parts": description_spans(item), "price_chart": price_history_chart(item["history"], item["last_seen"])})
 
 
 @app.get("/favourites")

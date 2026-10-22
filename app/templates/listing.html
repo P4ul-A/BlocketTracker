@@ -11,12 +11,12 @@
 </dialog>{% endif %}
 <section class="panel description-card" id="description-analysis" data-listing-id="{{ item.id }}" data-status="{{ item.analysis.status }}">
 {% set status = item.analysis.status %}
-{% set status_label = {'ready':'Analysis done. Highlighted text shows seller statements identified by the LLM; unmarked text is not verified.', 'pending':'Description analysis pending. Highlights will appear automatically.', 'error':'Description analysis unavailable; retrying automatically.', 'disabled':'Description analysis disabled.', 'no_description':'No description available to analyze.'}.get(status, 'Description analysis pending.') %}
+{% set status_label = {'ready':'Analysis done. Highlighted text shows seller statements identified by the LLM and driving-denial rules; unmarked text is not verified.', 'pending':'Description analysis pending. Highlights will appear automatically.', 'error':'Description analysis unavailable; retrying automatically.', 'disabled':'Description analysis disabled.', 'no_description':'No description available to analyze.'}.get(status, 'Description analysis pending.') %}
 <span class="analysis-indicator analysis-{{ status }}" tabindex="0" role="img" aria-label="{{ status_label }}{% if item.analysis.get('truncated') %} Only the first 12,000 characters were analyzed.{% endif %}" title="{{ status_label }}{% if item.analysis.get('truncated') %} Only the first 12,000 characters were analyzed.{% endif %}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{% if status == 'ready' %}<path d="m5 12 4 4L19 6"/>{% elif status == 'pending' %}<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>{% elif status == 'error' %}<path d="M12 5v9m0 4h.01"/>{% else %}<path d="M6 12h12"/>{% endif %}</svg>
 </span>
 <h2>Description</h2>
-<p class="description">{% if item.description %}{% for part in description_parts %}{% if part.label %}<mark class="description-highlight highlight-{{ part.tone }}" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="finding-dialog" data-decisions="{{ part.decisions|tojson|forceescape }}" title="Click to see the model decision" aria-label="{{ part.text }} — {{ part.label }}">{{ part.text }}</mark>{% else %}{{ part.text }}{% endif %}{% endfor %}{% else %}No description available yet. Open the original advert for complete information.{% endif %}</p>
+<p class="description">{% if item.description %}{% for part in description_parts %}{% if part.label %}<mark class="description-highlight highlight-{{ part.tone }}" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="finding-dialog" data-decisions="{{ part.decisions|tojson|forceescape }}" title="Click to see the extracted finding" aria-label="{{ part.text }} — {{ part.label }}">{{ part.text }}</mark>{% else %}{{ part.text }}{% endif %}{% endfor %}{% else %}No description available yet. Open the original advert for complete information.{% endif %}</p>
 {% if item.equipment %}<h3>Equipment</h3><ul>{% for value in item.equipment %}<li>{{ value }}</li>{% endfor %}</ul>{% endif %}
 </section>
 {% if item.specifications %}<section class="panel"><h2>Advert specifications</h2><dl class="specs">{% for key,value in item.specifications.items() %}<dt>{{ key }}</dt><dd>{{ value }}</dd>{% endfor %}</dl></section>{% endif %}
@@ -25,8 +25,8 @@
 <section class="panel"><h2>Price history</h2><p class="small subtle">Observed asking prices; changes between refreshes may be missed.</p>{% include 'price_history.html' %}<p class="small subtle">First seen <time data-date="{{ item.first_seen }}">{{ item.first_seen }}</time><br>Last seen <time data-date="{{ item.last_seen }}">{{ item.last_seen }}</time><br>Details fetched <time data-date="{{ item.detail_at or '' }}">{{ item.detail_at or 'Not yet' }}</time></p></section>
 </aside></div>
 <dialog id="finding-dialog" class="finding-dialog" aria-labelledby="finding-dialog-title">
-<div class="finding-dialog-heading"><h2 id="finding-dialog-title">Model decision</h2><button type="button" id="close-finding-dialog" class="text-button" aria-label="Close model decision">×</button></div>
+<div class="finding-dialog-heading"><h2 id="finding-dialog-title">Description finding</h2><button type="button" id="close-finding-dialog" class="text-button" aria-label="Close description finding">×</button></div>
 <div id="finding-dialog-content"></div>
-<p class="small subtle">Model: {{ item.analysis.model }}. This is an extracted seller statement; check the original wording.</p>
+<p class="small subtle">Analysis uses {{ item.analysis.model }} and driving-denial rules. This is an extracted seller statement; check the original wording.</p>
 </dialog>
 {% endblock %}

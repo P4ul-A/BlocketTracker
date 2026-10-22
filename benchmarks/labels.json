@@ -1,0 +1,365 @@
+{
+  "basis": "Manual review of cached source text, independent of benchmark model outputs. Scores use effective application values: drivable defaults to true. Tyre inventory is semantic across the whole advert; the production one-sentence constraint can prevent valid extra-set evidence when summer and winter sets occur on separate lines. Offered-at-extra-cost sets are false; absent seasonal information is null. Ordinary equipment/inventory statements count as included. AWD failure alone is not non-drivability. Friction tyres count as winter tyres; S- and V-hjul abbreviate summer/winter wheels.",
+  "labels": {
+    "27121168": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "24103559": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "19212832": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27372082": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "26048929": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "25944428": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "25750270": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "24662065": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "27371096": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "23752494": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27247443": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27563955": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "26955626": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": true,
+      "summer_tires": null
+    },
+    "23288291": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27021858": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "26592161": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "20804527": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "20804282": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "23494647": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "25703966": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "25894325": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "26808340": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27046832": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "20572822": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "26988118": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "25464747": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27330458": {
+      "drivable": false,
+      "extra_tires": null,
+      "winter_tires": true,
+      "summer_tires": null
+    },
+    "27163770": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "27299645": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": true,
+      "summer_tires": null
+    },
+    "26590013": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "25728469": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "26669660": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "27021518": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": true,
+      "summer_tires": null
+    },
+    "26056465": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27457596": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27545163": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": true,
+      "summer_tires": null
+    },
+    "13899319": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27391849": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27451599": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "24992429": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "15538126": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "22016763": {
+      "drivable": true,
+      "extra_tires": false,
+      "winter_tires": true,
+      "summer_tires": null
+    },
+    "22361998": {
+      "drivable": true,
+      "extra_tires": false,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "22483092": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "23391606": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "23803263": {
+      "drivable": true,
+      "extra_tires": false,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "25124524": {
+      "drivable": true,
+      "extra_tires": null,
+      "winter_tires": true,
+      "summer_tires": null
+    },
+    "25389375": {
+      "drivable": true,
+      "extra_tires": false,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "25460030": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "26834194": {
+      "drivable": false,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "27061928": {
+      "drivable": false,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "27423934": {
+      "drivable": false,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27459397": {
+      "drivable": true,
+      "extra_tires": false,
+      "winter_tires": false,
+      "summer_tires": null
+    },
+    "27504476": {
+      "drivable": true,
+      "extra_tires": false,
+      "winter_tires": false,
+      "summer_tires": true
+    },
+    "27506467": {
+      "drivable": false,
+      "extra_tires": null,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27587340": {
+      "drivable": true,
+      "extra_tires": false,
+      "winter_tires": false,
+      "summer_tires": true
+    },
+    "27591404": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    },
+    "26098054": {
+      "drivable": true,
+      "extra_tires": false,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "26804899": {
+      "drivable": true,
+      "extra_tires": false,
+      "winter_tires": null,
+      "summer_tires": null
+    },
+    "27417967": {
+      "drivable": true,
+      "extra_tires": true,
+      "winter_tires": true,
+      "summer_tires": true
+    }
+  }
+}

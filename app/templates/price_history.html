@@ -1,7 +1,6 @@
 <div class="price-history">
 {% if price_chart %}
-<svg viewBox="0 0 440 260" role="img" aria-labelledby="price-chart-title price-chart-description">
-  <title id="price-chart-title">Price development over time</title>
+<svg viewBox="0 0 440 260" role="group" aria-label="Price development over time" aria-describedby="price-chart-description">
   <desc id="price-chart-description">Observed asking prices in SEK. {% for point in price_chart.points %}{{ point.date }} {{ point.time }}: {{ point.price }} SEK. {% endfor %}</desc>
   <text x="78" y="14">SEK</text>
   {% for tick in price_chart.ticks %}
@@ -9,16 +8,26 @@
   <text x="68" y="{{ tick.y + 4 }}" text-anchor="end">{{ tick.label }}</text>
   {% endfor %}
   <path d="{{ price_chart.path }}" class="price-line"/>
-  {% for point in price_chart.points %}
-  <circle cx="{{ point.x }}" cy="{{ point.y }}" r="4" class="price-point" tabindex="0" aria-label="{{ point.date }} {{ point.time }}: {{ point.price }} SEK"><title>{{ point.date }} {{ point.time }}: {{ point.price }} SEK</title></circle>
-  {% endfor %}
   {% for point in price_chart.ends %}
   {% set anchor = 'middle' if price_chart.ends|length == 1 else ('start' if loop.first else 'end') %}
   <text x="{{ point.x }}" y="228" text-anchor="{{ anchor }}">{{ point.date }}</text>
   <text x="{{ point.x }}" y="246" text-anchor="{{ anchor }}">{{ point.time }}</text>
   {% endfor %}
+  {% for point in price_chart.points %}
+  <g class="price-observation">
+    <circle cx="{{ point.x }}" cy="{{ point.y }}" r="10" class="price-point-target" tabindex="0" role="img" aria-label="Collected {{ point.date }} {{ point.time }} (Stockholm time): {{ point.price }} SEK"/>
+    <circle cx="{{ point.x }}" cy="{{ point.y }}" r="4" class="price-point" aria-hidden="true"/>
+    {% set tooltip_x = [[point.x - 112, 78]|max, 206]|min %}
+    {% set tooltip_y = [point.y - 56, 0]|max %}
+    <g class="price-tooltip" transform="translate({{ tooltip_x }} {{ tooltip_y }})" aria-hidden="true">
+      <rect width="224" height="46" rx="5"/>
+      <text x="10" y="18" class="price-tooltip-value">{{ point.price }} SEK</text>
+      <text x="10" y="35">Collected {{ point.date }} {{ point.time }}</text>
+    </g>
+  </g>
+  {% endfor %}
 </svg>
-{% if price_chart.points|length == 1 %}<p class="small subtle">One recorded price so far. Changes will appear as more prices are observed.</p>{% endif %}
+{% if price_chart.points|length == 1 %}<p class="small subtle">Only one sighting with a recorded price so far. A line will appear when the car is seen again.</p>{% endif %}
 {% else %}
 <p class="small subtle">No price observations available yet.</p>
 {% endif %}

@@ -21,7 +21,12 @@
 .finding-risk{background:#fbe3df;color:#a43c2e}
 
 .listing-card.over-estimate{border-color:#d58b85;box-shadow:0 0 0 1px #e9b5b0}.over-estimate-badge{background:#fbe3df;color:#a43c2e}.map-dot.over-price{background:#c9554d;margin-left:12px}.map-caption{flex-wrap:wrap}
-.price-history{margin:20px 0}.price-history svg{display:block;width:100%;height:auto;overflow:visible}.price-history svg text{fill:var(--muted);font:12px system-ui,sans-serif}.price-grid{stroke:var(--line);stroke-width:1}.price-line{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round}.price-point{fill:var(--ink);stroke:white;stroke-width:2}.price-point:focus{outline:none;stroke:var(--orange);stroke-width:3}
+.price-history{margin:20px 0}.price-history svg{display:block;width:100%;height:auto;overflow:visible}.price-history svg text{fill:var(--muted);font:12px system-ui,sans-serif}.price-grid{stroke:var(--line);stroke-width:1}.price-line{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round}.price-point{fill:var(--ink);stroke:white;stroke-width:2;pointer-events:none}
+/* Larger targets reveal collection details immediately on hover or keyboard focus. */
+.price-point-target{fill:transparent;cursor:help;outline:none}.price-observation:hover .price-point,.price-observation:focus-within .price-point{stroke:var(--orange);stroke-width:3}.price-tooltip{visibility:hidden;pointer-events:none}.price-observation:hover .price-tooltip,.price-observation:focus-within .price-tooltip{visibility:visible}.price-tooltip rect{fill:var(--ink)}.price-history .price-tooltip text{fill:white;font-size:11px}.price-history .price-tooltip-value{font-weight:700}
+
+/* Keep page navigation reachable above maps and clear of mobile safe areas. */
+.back-to-top{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:1100;min-width:48px;min-height:48px;gap:8px;box-shadow:0 3px 12px #0002}
 
 /* Keep full-size photos inside an accessible modal preview. */
 .gallery-preview{display:block;min-width:0;padding:0;border:0;border-radius:8px;background:transparent;cursor:zoom-in}.image-preview{width:min(1100px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--white);overflow:auto}.image-preview::backdrop{background:#000b}.image-preview button{display:flex;margin:0 0 12px auto}.image-preview img{display:block;width:100%;max-height:calc(100dvh - 130px);object-fit:contain}
@@ -36,6 +41,13 @@
 .search-card .card-title::after{content:"";position:absolute;inset:0;border-radius:12px}
 .search-card .card-actions a,.search-card .card-actions button{position:relative;z-index:1}
 .search-card:focus-within{outline:3px solid #82ad5a;outline-offset:3px}
+
+/* Make car cards native links while keeping favourite and map buttons usable. */
+.listing-card{position:relative}
+.listing-link::after{content:"";position:absolute;inset:0;border-radius:10px}
+.listing-card .favourite-button,.listing-card .pin-button{position:relative;z-index:1}
+.listing-link:focus-visible{outline:none}
+.listing-link:focus-visible::after{outline:3px solid #82ad5a;outline-offset:-3px}
 
 /* Keep the daily start-hour checklist compact on phones and desktops. */
 .refresh-schedule{margin:0;padding:0;border:0;min-width:0}
@@ -91,3 +103,31 @@
 /* Let the model status tooltip extend beyond the collapsed overview. */
 .search-overview{overflow:visible}
 .search-overview .metrics{border-radius:10px 10px 0 0}
+
+/* Keep live and historical search runs readable without a wide log table. */
+.task-log-panel{margin-top:24px}
+.task-log-panel h2{margin-bottom:0}
+.task-search-group{margin-top:24px;padding:16px;border:1px solid var(--line);border-radius:10px;min-width:0}
+.task-search-group h3{display:flex;align-items:baseline;flex-wrap:wrap;gap:12px;margin:0 0 8px;overflow-wrap:anywhere}
+.task-search-group h3 a{color:inherit}
+.task-search-group>p{margin:8px 0 16px}
+.task-entry{padding:16px 0;border-top:1px solid var(--line)}
+.task-entry summary{display:flex;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer;list-style:none}
+.task-entry summary::-webkit-details-marker{display:none}
+.task-entry summary::before{content:'▸';font-size:16px}
+.task-entry[open] summary::before{content:'▾'}
+.task-total{margin-left:auto;font-size:13px;white-space:nowrap}
+.task-duration{font-variant-numeric:tabular-nums;white-space:nowrap}
+.task-entry>p{margin:10px 0;overflow-wrap:anywhere}
+.task-message{font-size:13px}
+.task-steps{margin:16px 0 0;padding-left:24px}
+.task-steps li{padding:8px 0}
+.task-step-heading{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px}
+.task-step-heading>.task-duration{margin-left:auto}
+.task-steps p{margin:4px 0 0;overflow-wrap:anywhere}
+.task-status.task-running{background:#bddbff;color:#164a85}
+.task-status.task-complete{background:#b5e4c0;color:#14532d}
+.task-status.task-waiting,.task-status.task-queued{background:#fff0ce;color:#713f12}
+.task-status.task-error{background:#ffc3c8;color:#8b1e26}
+.task-status.task-partial,.task-status.task-interrupted{background:#ffd29b;color:#7a3b08}
+@media(max-width:600px){.task-total{width:100%;margin-left:24px}.task-entry summary{gap:8px}.task-step-heading{gap:8px}}

@@ -1,5 +1,40 @@
 # Implementation verification
 
+## Whole car links and missed Swedish driving denials — 22 October 2026
+
+Extended the native title link across car cards in search results and favourites.
+Favourite and map buttons sit above the link overlay, and keyboard focus outlines
+the card. Rendered a favourite card from a real listing and confirmed one detail
+link, a separate favourite button, and no buttons nested inside links. Browser
+interaction and visual layout remain unverified.
+
+Inspected the database read-only: 2,111 listings and 522 version-six cached
+analyses. Advert 27330458 explicitly says the gearbox is broken and the car cannot
+drive forward, 27061928 says `Startar ej`, and 26834194 says the engine currently
+will not turn over. All three raw LLM selections were true with no source sentence,
+so the existing validator defaulted to assumed drivability. The old patterns also
+missed several ordinary Swedish constructions.
+
+Revalidated all 522 cached raw responses in memory with the expanded rules. The
+three missed listings became not drivable, with verbatim supporting sentences;
+other cached drivability decisions remained unchanged. Scanning all available
+descriptions found those three plus the two existing explicit non-drivable cars.
+Checked that a non-starting diesel heater, a repaired historical fault, occasional
+starting difficulty, an AWD-only fault, and refusal of a test drive alone did not
+trigger a driving denial. Direct Swedish and English driving denials did trigger.
+Rendered a corrected detail page with a red highlight and rule provenance; checked
+that its spans reconstruct the original description and that filters and model
+features both use `no`. The real heater-only advert 26119782 retained `yes`.
+
+The prompt now asks for null when driving information is absent; application-level
+default behavior stays unchanged. Extraction version seven invalidates old cache
+entries for background re-analysis. Kept direct Swedish extraction rather than
+adding translation, since translation would not address validator rejection.
+Ollama was unavailable on localhost, so fresh model responses and translation
+quality were not evaluated. Python/Jinja parsing, JavaScriptCore syntax, and
+`git diff --check` passed. No tests or notebooks were written; live data was not
+modified.
+
 Performed on 21 October 2026 using Python 3.12 on the development Mac.
 No automated test files were written and no notebooks were edited. All verification
 observations were stored in a temporary `/tmp` database, separate from user data.
@@ -257,3 +292,83 @@ isolated database with an estimate of 100: asking 90 was green, 110 was red, 109
 was unmarked, and missing price was unmarked. Both threshold cases appeared in the
 highlights-only response. Python compilation and whitespace checks passed; no
 automated test files were added. Browser visual inspection remains unverified.
+
+## Unchanged price history line — 22 October 2026
+
+The chart used only price-change timestamps, so a car seen repeatedly at the same
+price displayed a single dot. It now extends the final price to the listing's
+last-seen timestamp, giving unchanged prices a horizontal line and changed prices
+a final horizontal segment. A genuine single sighting still displays a dot. The
+chart does not extend to the current time or past an unavailable-price observation.
+Existing stored data works immediately; no migration or extra collection is needed.
+
+Read the local database without modifying it and generated charts for all 2,111
+listings: 2,109 now have a line, and two have a single timestamp. Confirmed a real
+7,000 SEK listing renders a flat path with distinct first/last sighting labels,
+and an existing price-change history retains its vertical step. Rendered the exact
+timestamps from the user's screenshot: 21 October at 19:42:57 through 22 October at
+09:04:17, Stockholm time, with two 7,000 SEK endpoints and no single-sighting notice.
+Also manually checked empty history and a later unavailable-price observation.
+Python/Jinja parsing and `git diff --check` passed. No tests or notebooks were
+written. Browser visual inspection remains unverified.
+
+## Smooth price history and collection tooltips — 22 October 2026
+
+Replaced the step path with cubic curves through the observed prices. Each segment
+stays within its endpoint prices, and unchanged prices remain horizontal. Points
+now have larger hover targets and immediate tooltips showing the price and collection
+date/time in Stockholm time. Keyboard focus reveals the same details. Removed the
+chart-wide native title tooltip so it does not compete with point details.
+
+Manually rendered a price drop with a later unchanged sighting, empty history, a
+single sighting, an unchanged price, and a later unavailable price. Python parsing,
+Jinja rendering, SVG/XML parsing, and whitespace checks passed. No tests or
+notebooks were written. Browser visual inspection remains unverified.
+
+## Settings task log — 22 October 2026
+
+Added persistent task runs, ordered subtasks, and temporary run/listing membership
+to SQLite. Each queued search refresh owns one run covering purchase/comparable
+collection, initial model training, LLM analysis, and retraining. The independent
+LLM worker attributes shared requests/batch retraining to all owning search runs.
+Unowned saved descriptions use one background backfill run; startup model training
+is logged separately. Parent elapsed includes inter-stage waits; stage times sum
+active calls, and initial queue wait is separate. Running, waiting, completed,
+partial, failed, skipped, and interrupted states are visible in Settings, with
+live counters and five-second polling. Finished details retain their timestamps
+and progress/error messages. The API shows every active run and the latest 50
+finished runs; older history remains stored. Unclean restart recovery closes runs
+at their last persisted activity rather than adding unknown downtime.
+
+Manually exercised the real collector worker and analyzer against an isolated
+temporary database using a recorded advert/page and recorded Ollama decisions.
+Two searches produced two task runs with all four stages, while their shared
+listing required one inference request. Confirmed running analysis state during
+the request, accumulating stage times, and successful completion after retraining.
+A replayed HTTP 503 left analysis waiting with its error/progress message and
+respected the existing retry cooldown. A failed retraining operation was retried
+before closing the run, retaining its partial-collection outcome. Disabled analysis
+skipped both LLM stages; a collection outage marked collection/run failed and later
+stages skipped. A timing example accumulated five active seconds across ten elapsed
+seconds; simulated crash recovery excluded downtime. Reinitializing the database
+retained completed/interrupted history. Confirmed the 50-finished-plus-active limit.
+Startup lifecycle, Settings HTML, and task-history API returned successfully.
+
+Python/Jinja parsing, JavaScriptCore syntax, and whitespace checks passed. No test
+files or notebooks were written, and the user's live database was not modified.
+Fresh external-service responses and browser visual interaction remain unverified.
+
+## Docker startup migration — 22 October 2026
+
+The container was repeatedly restarting with `sqlite3.OperationalError: no such
+column: updated_at`. An existing `task_runs` table predated the heartbeat column;
+`CREATE TABLE IF NOT EXISTS` did not upgrade it. Startup now adds the missing
+column and fills it from the latest saved run/stage activity before recovering
+interrupted tasks. Existing task history is retained.
+
+Saved a SQLite backup before rebuilding. Manually ran initialization twice and
+interrupted-task recovery on a copy of the existing database: both saved runs
+were retained, timestamps were populated, and task history remained readable.
+Rebuilt and started the Compose service; Docker reported healthy, startup completed,
+and `/health` and `/api/settings/tasks` returned HTTP 200. Background Ollama requests
+also returned HTTP 200. `git diff --check` passed. No tests or notebooks were written.

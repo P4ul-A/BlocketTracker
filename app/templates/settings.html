@@ -2,7 +2,7 @@
 {% block title %}Settings · Blocket Tracker{% endblock %}
 {% block content %}
 <a class="back" href="/">← Saved searches</a>
-<div class="page-heading"><h1>Settings</h1><p class="subtle">Collection timing and local description analysis.</p></div>
+<div class="page-heading"><h1>Settings</h1><p class="subtle">Collection timing, description analysis, and task history.</p></div>
 <div class="form-panel">
 <section class="panel">
   <h2>Automatic refresh</h2>
@@ -29,4 +29,12 @@
   <p class="small subtle">Checks service connectivity and model installation without running an analysis.</p>
 </section>
 </div>
+<section class="panel task-log-panel" aria-labelledby="task-log-title">
+  <div class="heading-row"><h2 id="task-log-title">Task log</h2><button class="button secondary small" id="refresh-task-log" type="button">Refresh log</button></div>
+  <p class="small subtle">Tasks are grouped by saved search. Each refresh collects that search’s listings and comparables, then tracks model training and LLM analysis. Scheduled refreshes queue all searches and collect one search at a time; LLM analysis runs independently. Shared background work appears below the searches.</p>
+  <p class="small subtle">Total elapsed includes waiting between subtasks; initial queue time is shown separately. Subtask times add up across active batches. Shared LLM and model work can count toward several searches.</p>
+  <p id="task-log-status" class="small subtle" role="status" aria-live="polite">Loading tasks…</p>
+  <div id="task-log"></div>
+  <p class="small subtle">Updates every 5 seconds. History is saved across restarts; the latest 50 finished tasks are shown. Logging starts with this version of the app.</p>
+</section>
 {% endblock %}

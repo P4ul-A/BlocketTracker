@@ -1,0 +1,2281 @@
+{
+  "qwen3:1.7b": {
+    "requests": 60,
+    "errors": 0,
+    "mean_seconds": 1.5488334187665411,
+    "median_seconds": 1.3769872080010828,
+    "p95_seconds": 2.3459110420008074,
+    "total_seconds": 92.93000512599247,
+    "scores": {
+      "all": {
+        "fields": {
+          "drivable": {
+            "correct": 60,
+            "n": 60,
+            "tp": 55,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 33,
+            "n": 60,
+            "tp": 0,
+            "fp": 0,
+            "fn": 18
+          },
+          "winter_tires": {
+            "correct": 54,
+            "n": 60,
+            "tp": 22,
+            "fp": 2,
+            "fn": 3
+          },
+          "summer_tires": {
+            "correct": 50,
+            "n": 60,
+            "tp": 10,
+            "fp": 0,
+            "fn": 10
+          }
+        },
+        "exact_adverts": 32
+      },
+      "random": {
+        "fields": {
+          "drivable": {
+            "correct": 40,
+            "n": 40,
+            "tp": 39,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 30,
+            "n": 40,
+            "tp": 0,
+            "fp": 0,
+            "fn": 10
+          },
+          "winter_tires": {
+            "correct": 39,
+            "n": 40,
+            "tp": 14,
+            "fp": 0,
+            "fn": 1
+          },
+          "summer_tires": {
+            "correct": 35,
+            "n": 40,
+            "tp": 5,
+            "fp": 0,
+            "fn": 5
+          }
+        },
+        "exact_adverts": 29
+      },
+      "challenge": {
+        "fields": {
+          "drivable": {
+            "correct": 17,
+            "n": 17,
+            "tp": 13,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 3,
+            "n": 17,
+            "tp": 0,
+            "fp": 0,
+            "fn": 7
+          },
+          "winter_tires": {
+            "correct": 12,
+            "n": 17,
+            "tp": 7,
+            "fp": 2,
+            "fn": 2
+          },
+          "summer_tires": {
+            "correct": 12,
+            "n": 17,
+            "tp": 4,
+            "fp": 0,
+            "fn": 5
+          }
+        },
+        "exact_adverts": 3
+      },
+      "long": {
+        "fields": {
+          "drivable": {
+            "correct": 3,
+            "n": 3,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 0,
+            "n": 3,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "winter_tires": {
+            "correct": 3,
+            "n": 3,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "summer_tires": {
+            "correct": 3,
+            "n": 3,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "exact_adverts": 0
+      }
+    },
+    "mismatches": [
+      {
+        "id": "27121168",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "25750270",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "24662065",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27563955",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27021858",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "23494647",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27046832",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27163770",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26590013",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26669660",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27545163",
+        "fields": {
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "15538126",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "22016763",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "22361998",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "22483092",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "23391606",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "23803263",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "25389375",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "25460030",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26834194",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27061928",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27459397",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": false,
+            "actual": {
+              "value": true,
+              "evidence": "* (Vinterhjul finns att köpa till denna modell)"
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 1
+            }
+          }
+        }
+      },
+      {
+        "id": "27504476",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27587340",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": false,
+            "actual": {
+              "value": true,
+              "evidence": "Vinterdäck, använda en säsong, på alu-fälg går att köpa till."
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 9
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27591404",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 8
+            }
+          }
+        }
+      },
+      {
+        "id": "26098054",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26804899",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27417967",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      }
+    ]
+  },
+  "qwen3.5:4b": {
+    "requests": 60,
+    "errors": 0,
+    "mean_seconds": 4.426532529866381,
+    "median_seconds": 4.006686291500955,
+    "p95_seconds": 6.952912916000059,
+    "total_seconds": 265.59195179198286,
+    "scores": {
+      "all": {
+        "fields": {
+          "drivable": {
+            "correct": 60,
+            "n": 60,
+            "tp": 55,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 39,
+            "n": 60,
+            "tp": 5,
+            "fp": 1,
+            "fn": 13
+          },
+          "winter_tires": {
+            "correct": 42,
+            "n": 60,
+            "tp": 11,
+            "fp": 0,
+            "fn": 14
+          },
+          "summer_tires": {
+            "correct": 52,
+            "n": 60,
+            "tp": 13,
+            "fp": 0,
+            "fn": 7
+          }
+        },
+        "exact_adverts": 36
+      },
+      "random": {
+        "fields": {
+          "drivable": {
+            "correct": 40,
+            "n": 40,
+            "tp": 39,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 32,
+            "n": 40,
+            "tp": 2,
+            "fp": 0,
+            "fn": 8
+          },
+          "winter_tires": {
+            "correct": 30,
+            "n": 40,
+            "tp": 5,
+            "fp": 0,
+            "fn": 10
+          },
+          "summer_tires": {
+            "correct": 36,
+            "n": 40,
+            "tp": 6,
+            "fp": 0,
+            "fn": 4
+          }
+        },
+        "exact_adverts": 30
+      },
+      "challenge": {
+        "fields": {
+          "drivable": {
+            "correct": 17,
+            "n": 17,
+            "tp": 13,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 7,
+            "n": 17,
+            "tp": 3,
+            "fp": 1,
+            "fn": 4
+          },
+          "winter_tires": {
+            "correct": 10,
+            "n": 17,
+            "tp": 6,
+            "fp": 0,
+            "fn": 3
+          },
+          "summer_tires": {
+            "correct": 13,
+            "n": 17,
+            "tp": 6,
+            "fp": 0,
+            "fn": 3
+          }
+        },
+        "exact_adverts": 6
+      },
+      "long": {
+        "fields": {
+          "drivable": {
+            "correct": 3,
+            "n": 3,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 0,
+            "n": 3,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "winter_tires": {
+            "correct": 2,
+            "n": 3,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "summer_tires": {
+            "correct": 3,
+            "n": 3,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "exact_adverts": 0
+      }
+    },
+    "mismatches": [
+      {
+        "id": "27121168",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "25750270",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": false,
+              "evidence": "Nya sommardäck, på 7x17-tums Ocean Race originalfälg \"Oreander\", från hösten -24."
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 20
+            }
+          }
+        }
+      },
+      {
+        "id": "24662065",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27563955",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "23494647",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": false,
+              "evidence": "Bilen är precis skiftad till vinterdäck och redo att rulla iväg tryggt i kylan!"
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 3
+            }
+          }
+        }
+      },
+      {
+        "id": "27163770",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27299645",
+        "fields": {
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26590013",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26669660",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27021518",
+        "fields": {
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 6
+            }
+          }
+        }
+      },
+      {
+        "id": "22016763",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "22361998",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "22483092",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": false,
+              "evidence": "Detta exemplar levereras med både sommarhjul och vinterhjul samt har komplett servicebok utförd hos Volvo, vilket ger ett extra tryggt ägande."
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 5
+            }
+          }
+        }
+      },
+      {
+        "id": "23803263",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": true,
+              "evidence": "Superdeal 3,95% i ränta på finansiering / Billån vid köp av Bil + Trygghetspaket (Trygghetspaketet innehåller bla en andra uppsättning däck samt 2 års garanti, Se bild 4.)"
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 8
+            }
+          },
+          "winter_tires": {
+            "expected": null,
+            "actual": {
+              "value": false,
+              "evidence": "Superdeal 3,95% i ränta på finansiering / Billån vid köp av Bil + Trygghetspaket (Trygghetspaketet innehåller bla en andra uppsättning däck samt 2 års garanti, Se bild 4.)"
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 8
+            }
+          }
+        }
+      },
+      {
+        "id": "25124524",
+        "fields": {
+          "summer_tires": {
+            "expected": null,
+            "actual": {
+              "value": false,
+              "evidence": "Fyrhjulsdriften fungerar ej, har inte felsökt."
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 13
+            }
+          }
+        }
+      },
+      {
+        "id": "26834194",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": false,
+              "evidence": "* Helt nya Continental PremiumContact 5 sommardäck"
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 12
+            }
+          }
+        }
+      },
+      {
+        "id": "27061928",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27459397",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27504476",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27587340",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27591404",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 9
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": false,
+              "evidence": "Fina S- och V-hjul (en säsong gamla) på orginalfälgar ingår i köpet."
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 9
+            }
+          }
+        }
+      },
+      {
+        "id": "26098054",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26804899",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27417967",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": false,
+              "evidence": "Två däck har hyggligt mönsterdjup medan de andra två bör bytas inför nästa säsong."
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 21
+            }
+          }
+        }
+      }
+    ]
+  },
+  "qwen3.5:2b": {
+    "requests": 60,
+    "errors": 0,
+    "mean_seconds": 2.7606617415830743,
+    "median_seconds": 2.580384958502691,
+    "p95_seconds": 4.238580124998407,
+    "total_seconds": 165.63970449498447,
+    "scores": {
+      "all": {
+        "fields": {
+          "drivable": {
+            "correct": 60,
+            "n": 60,
+            "tp": 55,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 38,
+            "n": 60,
+            "tp": 5,
+            "fp": 3,
+            "fn": 13
+          },
+          "winter_tires": {
+            "correct": 54,
+            "n": 60,
+            "tp": 21,
+            "fp": 1,
+            "fn": 4
+          },
+          "summer_tires": {
+            "correct": 46,
+            "n": 60,
+            "tp": 6,
+            "fp": 0,
+            "fn": 14
+          }
+        },
+        "exact_adverts": 33
+      },
+      "random": {
+        "fields": {
+          "drivable": {
+            "correct": 40,
+            "n": 40,
+            "tp": 39,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 32,
+            "n": 40,
+            "tp": 2,
+            "fp": 0,
+            "fn": 8
+          },
+          "winter_tires": {
+            "correct": 38,
+            "n": 40,
+            "tp": 13,
+            "fp": 0,
+            "fn": 2
+          },
+          "summer_tires": {
+            "correct": 33,
+            "n": 40,
+            "tp": 3,
+            "fp": 0,
+            "fn": 7
+          }
+        },
+        "exact_adverts": 30
+      },
+      "challenge": {
+        "fields": {
+          "drivable": {
+            "correct": 17,
+            "n": 17,
+            "tp": 13,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 6,
+            "n": 17,
+            "tp": 3,
+            "fp": 2,
+            "fn": 4
+          },
+          "winter_tires": {
+            "correct": 13,
+            "n": 17,
+            "tp": 7,
+            "fp": 1,
+            "fn": 2
+          },
+          "summer_tires": {
+            "correct": 11,
+            "n": 17,
+            "tp": 3,
+            "fp": 0,
+            "fn": 6
+          }
+        },
+        "exact_adverts": 3
+      },
+      "long": {
+        "fields": {
+          "drivable": {
+            "correct": 3,
+            "n": 3,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "extra_tires": {
+            "correct": 0,
+            "n": 3,
+            "tp": 0,
+            "fp": 1,
+            "fn": 1
+          },
+          "winter_tires": {
+            "correct": 3,
+            "n": 3,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "summer_tires": {
+            "correct": 2,
+            "n": 3,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          }
+        },
+        "exact_adverts": 0
+      }
+    },
+    "mismatches": [
+      {
+        "id": "27121168",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "25750270",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "24662065",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27563955",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27021858",
+        "fields": {
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "23494647",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27046832",
+        "fields": {
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27163770",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26590013",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26669660",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "15538126",
+        "fields": {
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "22016763",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "22361998",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": true,
+              "evidence": "• Förmånliga priser på extra uppsättning däck"
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 15
+            }
+          }
+        }
+      },
+      {
+        "id": "22483092",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "23391606",
+        "fields": {
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "23803263",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "25389375",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": true,
+              "evidence": "Extra uppsättning däck går att köpa till från 3995:-"
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 2
+            }
+          }
+        }
+      },
+      {
+        "id": "25460030",
+        "fields": {
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26834194",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 15
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27061928",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27459397",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": 1
+            }
+          },
+          "winter_tires": {
+            "expected": false,
+            "actual": {
+              "value": true,
+              "evidence": "* (Vinterhjul finns att köpa till denna modell)"
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 1
+            }
+          }
+        }
+      },
+      {
+        "id": "27504476",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          },
+          "winter_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27587340",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "27591404",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 9
+            }
+          },
+          "winter_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26098054",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      },
+      {
+        "id": "26804899",
+        "fields": {
+          "extra_tires": {
+            "expected": false,
+            "actual": {
+              "value": true,
+              "evidence": "Välj mellan 12-60 månaders garanti och komplettera med extra hjuluppsättningar till bra priser."
+            },
+            "raw": {
+              "value": true,
+              "sentence_id": 58
+            }
+          }
+        }
+      },
+      {
+        "id": "27417967",
+        "fields": {
+          "extra_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": null,
+              "sentence_id": null
+            }
+          },
+          "summer_tires": {
+            "expected": true,
+            "actual": {
+              "value": null,
+              "evidence": ""
+            },
+            "raw": {
+              "value": false,
+              "sentence_id": null
+            }
+          }
+        }
+      }
+    ]
+  }
+}

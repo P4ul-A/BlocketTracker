@@ -1,5 +1,10 @@
 /* Small same-origin UI layer. External advert text is always inserted as text. */
 'use strict';
+
+// Keep the top of every page within reach, respecting reduced-motion preferences.
+document.querySelector('#back-to-top')?.addEventListener('click', () => {
+  window.scrollTo({top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
+});
 const money = value => value == null ? 'Unavailable' : `${Math.round(value).toLocaleString('sv-SE')} SEK`;
 const date = value => value ? new Date(value).toLocaleString('en-GB', {timeZone: 'Europe/Stockholm'}) : 'Not yet';
 const toast = message => {
@@ -170,11 +175,11 @@ if (searchPage) {
       if (!labels[key] || fact.assumed) return;
       if (fact.value !== true && !(key === 'drivable' && fact.value === false)) return;
       const badge = node('span', key === 'drivable' && fact.value === false ? 'Not drivable' : labels[key], key === 'drivable' && fact.value === false ? 'badge finding-risk' : 'badge finding-yes');
-      badge.title = `LLM finding: ${fact.evidence}`; findings.append(badge);
+      badge.title = `Description finding: ${fact.evidence}`; findings.append(badge);
     });
     if (findings.childNodes.length) body.append(findings);
     const title = node('h3');
-    const link = node('a', car.title); link.href = `/listings/${car.id}`; title.append(link); body.append(title);
+    const link = node('a', car.title, 'listing-link'); link.href = `/listings/${car.id}`; title.append(link); body.append(title);
     body.append(node('p', [car.year, car.mileage == null ? 'Mileage unknown' : `${car.mileage.toLocaleString('sv-SE')} km`, car.fuel].filter(Boolean).join(' · ')));
     if (car.variant) body.append(node('p', car.variant));
     body.append(node('div', money(car.price), 'listing-price'));
@@ -318,6 +323,7 @@ if (findingDialog) {
         section.append(node('h3', decision.label));
         section.append(node('p', decision.key === 'drivable' ? (decision.value ? 'Decision: Drivable' : 'Decision: Not drivable') : (decision.value ? 'Decision: Yes' : 'Decision: No — explicitly denied'), 'finding-decision-value'));
         section.append(node('blockquote', decision.evidence));
+        section.append(node('p', decision.source === 'rule' ? 'Recognized from an explicit driving denial.' : 'Selected by the language model.', 'small subtle'));
         content.append(section);
       });
       findingDialog.showModal();
@@ -395,6 +401,124 @@ if (settingsForm) {
   }
   checkButton.addEventListener('click', checkOllama);
   checkOllama();
+}
+
+const taskLog = document.querySelector('#task-log');
+if (taskLog) {
+  const labels = {queued: 'Queued', waiting: 'Waiting', running: 'Running', complete: 'Complete',
+    partial: 'Partial', error: 'Error', skipped: 'Skipped', interrupted: 'Interrupted'};
+  let snapshot, loadedAt = 0, loading = false;
+  const expanded = new Map();
+  const duration = seconds => {
+    if (seconds < 1) return '<1s';
+    const total = Math.floor(seconds);
+    const hours = Math.floor(total / 3600), minutes = Math.floor(total % 3600 / 60);
+    return [hours ? `${hours}h` : '', minutes ? `${minutes}m` : '', `${total % 60}s`].filter(Boolean).join(' ');
+  };
+  const timing = (seconds, running) => {
+    const text = node('span', duration(seconds), 'task-duration');
+    text.dataset.seconds = seconds;
+    text.dataset.running = String(running);
+    return text;
+  };
+  const badge = status => node('span', labels[status] || status, `badge task-status task-${status}`);
+  function renderTasks() {
+    const focusedTask = document.activeElement.closest('.task-entry')?.dataset.taskId;
+    taskLog.replaceChildren();
+    if (!snapshot.tasks.length && !snapshot.searches.length) {
+      taskLog.append(node('p', 'No tasks recorded yet. Refresh a search to start a task.', 'subtle'));
+      return;
+    }
+    // Group by stable search ID so renames keep their history together.
+    const groups = new Map(snapshot.searches.map(search => [search.id, {...search, tasks: [], exists: true}]));
+    const shared = {name: 'Shared background work', tasks: []};
+    snapshot.tasks.forEach(task => {
+      if (task.search_id == null) {
+        shared.tasks.push(task);
+        return;
+      }
+      if (!groups.has(task.search_id)) groups.set(task.search_id, {id: task.search_id, name: task.name, tasks: [], exists: false});
+      groups.get(task.search_id).tasks.push(task);
+    });
+    // Surface searches with active work first; shared work stays below searches.
+    const ordered = [...groups.values()].sort((a, b) =>
+      Number(b.tasks.some(task => !task.finished_at)) - Number(a.tasks.some(task => !task.finished_at)));
+    if (shared.tasks.length) ordered.push(shared);
+    ordered.forEach(group => {
+      const section = node('section', null, 'task-search-group');
+      const heading = node('h3');
+      if (group.exists) {
+        const link = node('a', group.name);
+        link.href = `/searches/${group.id}`;
+        heading.append(link);
+      } else heading.textContent = group.name;
+      if (group.id != null) heading.append(node('span', `Search #${group.id}${group.exists ? '' : ' · Deleted'}`, 'small subtle'));
+      section.append(heading);
+      if (group === shared) {
+        section.append(node('p', 'Startup model training and saved-listing LLM backfills use the shared listing pool across searches; they have no single search owner.', 'small subtle'));
+      }
+      const running = group.tasks.filter(task => task.status === 'running').length;
+      const waiting = group.tasks.filter(task => !task.finished_at && task.status !== 'running').length;
+      section.append(node('p', `${running} running · ${waiting} waiting/queued · ${group.tasks.length} recorded in this log`, 'small subtle'));
+      if (!group.tasks.length) section.append(node('p', 'No refresh tasks in the retained history. Refresh this search to record a task.', 'small subtle'));
+      group.tasks.forEach(task => {
+        const active = !task.finished_at;
+        const details = node('details', null, 'task-entry');
+        details.dataset.taskId = task.id;
+        details.open = expanded.has(task.id) ? expanded.get(task.id) : active;
+        details.addEventListener('toggle', () => expanded.set(task.id, details.open));
+        const summary = node('summary');
+        summary.append(node('strong', `${task.search_id == null ? task.name : 'Search refresh'} · #${task.id}`), badge(task.status));
+        const elapsed = node('span', task.started_at ? 'Elapsed ' : 'In queue ', 'task-total');
+        elapsed.append(timing(task.started_at ? task.duration_seconds : task.queue_seconds, active));
+        summary.append(elapsed);
+        details.append(summary);
+        if (task.search_id != null && task.name !== group.name) details.append(node('p', `Search name at refresh: ${task.name}`, 'small subtle'));
+        details.append(node('p', `Queued ${date(task.created_at)}${task.started_at ? ` · Started ${date(task.started_at)}` : ''}${task.finished_at ? ` · Finished ${date(task.finished_at)}` : ''}`, 'small subtle'));
+        if (task.started_at) details.append(node('p', `Initial queue wait: ${duration(task.queue_seconds)}`, 'small subtle'));
+        if (task.message) details.append(node('p', task.message, 'task-message'));
+        const list = node('ol', null, 'task-steps');
+        task.steps.forEach(step => {
+          const item = node('li');
+          const heading = node('div', null, 'task-step-heading');
+          heading.append(node('strong', step.label), badge(step.status), timing(step.duration_seconds, Boolean(step.active_at)));
+          item.append(heading);
+          if (step.started_at) item.append(node('p', `Started ${date(step.started_at)}${step.finished_at ? ` · Finished ${date(step.finished_at)}` : ''}`, 'small subtle'));
+          if (step.message) item.append(node('p', step.message, 'small subtle'));
+          list.append(item);
+        });
+        details.append(list);
+        section.append(details);
+      });
+      taskLog.append(section);
+    });
+    if (focusedTask) taskLog.querySelector(`[data-task-id="${focusedTask}"] summary`)?.focus({preventScroll: true});
+  }
+  function updateDurations() {
+    const elapsed = (performance.now() - loadedAt) / 1000;
+    taskLog.querySelectorAll('.task-duration').forEach(el => {
+      el.textContent = duration(Number(el.dataset.seconds) + (el.dataset.running === 'true' ? elapsed : 0));
+    });
+  }
+  async function loadTaskLog() {
+    if (loading) return;
+    loading = true;
+    const status = document.querySelector('#task-log-status');
+    try {
+      snapshot = await api('/api/settings/tasks', {cache: 'no-store'});
+      loadedAt = performance.now();
+      renderTasks();
+      const running = snapshot.tasks.filter(task => task.status === 'running').length;
+      const waiting = snapshot.tasks.filter(task => !task.finished_at && task.status !== 'running').length;
+      status.textContent = `${running} running · ${waiting} waiting/queued · Updated ${date(snapshot.updated_at)}`;
+    } catch (error) {
+      status.textContent = `Could not update task log: ${error.message}. Retrying automatically.`;
+    } finally { loading = false; }
+  }
+  document.querySelector('#refresh-task-log').addEventListener('click', loadTaskLog);
+  loadTaskLog();
+  setInterval(() => { if (!document.hidden) loadTaskLog(); }, 5000);
+  setInterval(() => { if (!document.hidden) updateDurations(); }, 1000);
 }
 
 // Keep dashboard analysis indicators current while the background worker runs.

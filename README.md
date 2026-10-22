@@ -16,6 +16,12 @@ learns an asking-price model. Manage the Compose stack through Dockhand.
 - Configurable price highlights: green below and red above the estimate, defaulting
   to a symmetric 10% threshold. Cards, badges, and map markers use the same colors.
   “Highlights only” includes both directions.
+- Price history shows a smooth line through the last confirmed sighting. Hover over
+  a point or focus it with the keyboard to see its price and collection timestamp
+  in Stockholm time. Curves between observations are illustrative. An unchanged
+  price appears as a flat line once the car has been seen again. SQLite stores price
+  changes only; the chart uses the listing's last-seen time for its endpoint and
+  never extends the line to the current time without a new sighting.
 
 ## Deploy on HexOS / Dockhand
 
@@ -164,6 +170,8 @@ is enabled, extracted description facts are included in the structured price mod
 - `GET /api/searches/{id}/listings`: results; optional `seller`, `deals`, `archived`,
   and `sort=discount|price|newest` query parameters.
 - `GET /api/listings/{id}`: normalized details and observed price history.
+- `GET /api/settings/tasks`: running/queued tasks and the latest 50 finished runs,
+  including subtask statuses, timestamps, progress messages, and durations.
 - `GET /api/status`, `GET /api/model`, `GET /health`: collection, model, and health.
 
 Edits save immediately. If a refresh is running, the latest edit is persisted and
@@ -254,6 +262,11 @@ Assumed drivability has no card badge, supporting quote, or text highlight. Filt
 used for drivability. Other facts still use unknown when unstated. Tyres
 available for an extra charge should not be classified as included.
 
+Click anywhere on a car card to open its details, including its photo and empty
+space. Favourite and **Show on map** buttons keep their own actions; the card link
+also supports keyboard navigation and opening in a new tab. This applies to both
+search results and favourites.
+
 Listing cards highlight positive findings. Listing details highlight supporting seller text directly in the description:
 not-drivable statements use a red tint; drivable statements and
 included extras use green. Click or tap a highlight to see its extracted decision and supporting quotation.
@@ -264,12 +277,28 @@ do not restrict the broader training sample. A strict “no” filter requires a
 negative statement; for other facts, select “unknown” to find adverts without a supported assertion.
 
 The extractor receives numbered source sentences and selects a supporting sentence
-ID for each decision. Evidence comes directly from that source sentence, preventing
-stitched or rewritten quotations. Structured output and related wording are checked.
-Drivability also requires a capability statement matching the selected yes/no value;
-words such as `körsträcka` (mileage) do not qualify. Ambiguous or unrecognized
-driving denials may be missed, leaving the default assumed Yes. Invalid
-or unsupported facts become unknown, except drivability which defaults to Yes. A small LLM can still misread negation or seller
+ID for each decision. It returns null for missing driving information; the
+application applies the assumed Yes default after validation. Evidence comes
+directly from that source sentence, preventing stitched or rewritten quotations.
+Structured output and related wording are checked. Drivability also requires a
+capability statement matching the selected yes/no value; words such as
+`körsträcka` (mileage) do not qualify.
+
+Explicit driving-denial rules scan the same original sentences and override a
+missed or contradictory LLM selection. They recognize forms such as `Startar ej`,
+`går inte att köra`, `den inte driver framåt`, reverse-only driving, a broken
+gearbox, an engine that will not turn over, and mandatory towing. Historical
+clauses and auxiliary-heater starting faults are excluded. A refusal to allow a
+test drive alone does not establish non-drivability. The finding popup identifies
+whether the decision came from a rule or the LLM; raw model selections remain
+available in the cache for debugging.
+
+Swedish is analyzed directly, without a separate translation pass: translating
+would add inference time and another opportunity to lose a negation, and would
+not fix a narrow evidence validator. Supporting quotes always retain the original
+Swedish. Ambiguous or unrecognized driving denials may still be missed, leaving
+the default assumed Yes. Invalid or unsupported facts become unknown, except
+drivability which defaults to Yes. A small LLM can still misread negation or seller
 wording, so inspect the quotations before acting. Descriptions are treated as data, and
 the model has no tools or access to application commands. Only the first 12,000 characters
 of unusually long descriptions are analyzed; this is indicated in the detail page.
@@ -313,6 +342,33 @@ is installed, and shows whether description analysis is enabled. Use **Check
 again** after starting Ollama or installing a model. Connection and analysis
 configuration still use the `LLM_URL`, `LLM_MODEL`, and `LLM_ENABLED` environment
 variables and require an app restart when changed.
+
+The **Task log** groups refresh tasks under their saved search, with a link to
+the search and counts of running and queued/waiting tasks. Searches with active
+work appear first, and searches without retained history still appear. Renaming a
+search keeps its runs together; deleted searches retain their recorded history
+without a link. Startup training and saved-listing LLM backfills appear under
+**Shared background work** because they have no single search owner.
+Each search refresh has **Listing collection**,
+**Training price model**, **LLM analysis**, and **Retraining model** underneath.
+Collection includes both purchase listings and comparables. Running stages have
+live timers; waiting stages show LLM progress and retry errors. Expand a finished
+task to see its outcome, start/end times, queue wait, and time spent in each stage.
+The log refreshes every five seconds and preserves expanded entries.
+
+Total elapsed runs from the start of collection through the final LLM/retraining
+work, including waits between stages; initial queue time is separate. Stage times
+accumulate actual worker calls across batches, including service and model-lock
+waits. A shared LLM request or training operation can contribute to several search
+tasks without running twice. Disabled LLM stages are skipped; existing valid facts
+are reused. Startup training and LLM backfill for other saved listings appear as
+separate system tasks. Collection and LLM workers continue independently.
+
+Task history is stored in SQLite and starts with this version; older stage timings
+cannot be reconstructed. All unfinished tasks and the latest 50 finished runs are
+shown. On shutdown/restart unfinished runs become **Interrupted**, while workers
+resume their normal scheduling/backfill. After an unclean stop, timings end at the
+last recorded activity and are labeled accordingly, excluding unknown downtime.
 
 ### Favourites
 
