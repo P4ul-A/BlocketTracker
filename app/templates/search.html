@@ -25,6 +25,21 @@
 </details>
 </div>
 
+<form id="results-filters" class="panel results-filters">
+<h2>Filter these results</h2>
+<p class="small subtle">Narrow this search’s saved matches. These filters leave your saved search unchanged. Filtered fields must have a known value.</p>
+<div class="results-filter-grid">
+{% for field,label,minimum,maximum in [('year','Model year',1900,2100),('mileage','Mileage (km)',0,none),('price','Price (SEK)',0,none)] %}
+<fieldset class="result-range"><legend>{{ label }}</legend><div>
+<label>From<input type="number" name="{{ field }}_from" min="{{ minimum }}" {% if maximum is not none %}max="{{ maximum }}"{% endif %} step="1" placeholder="Any" inputmode="numeric"></label>
+<label>To<input type="number" name="{{ field }}_to" min="{{ minimum }}" {% if maximum is not none %}max="{{ maximum }}"{% endif %} step="1" placeholder="Any" inputmode="numeric"></label>
+</div></fieldset>
+{% endfor %}
+<label class="result-transmission">Transmission<select name="transmission"><option value="">Any transmission</option><option value="MANUAL">Manual</option><option value="AUTOMATIC">Automatic</option></select></label>
+</div>
+<div class="results-filter-actions"><button class="button" type="submit">Apply filters</button><button class="button secondary" type="reset">Clear filters</button><span id="results-filter-status" class="small subtle" aria-live="polite"></span></div>
+</form>
+
 <div class="toolbar"><label>Seller<select id="seller-filter"><option value="all">All saved matches</option><option value="private">Private</option><option value="commercial">Commercial</option><option value="unknown">Unknown</option></select></label><label>Sort<select id="sort-filter"><option value="discount">Best discount</option><option value="price">Lowest price</option><option value="newest">Recently discovered</option></select></label><details class="finding-dropdown">
 <summary>Description findings <span id="finding-filter-count" class="badge" hidden></span></summary>
 <div class="panel finding-filter-panel">

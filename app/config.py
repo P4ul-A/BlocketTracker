@@ -7,6 +7,7 @@ DATA_DIR = Path(os.getenv("DATA_DIR", "./data"))
 API_BASE = os.getenv("BLOCKET_API_URL", "https://blocket-api.se").rstrip("/")
 MAX_PAGES = max(1, min(50, int(os.getenv("MAX_PAGES", "50"))))
 DETAIL_LIMIT = max(0, int(os.getenv("DETAIL_LIMIT", "100")))
+PRICE_HISTORY_LIMIT = max(2, int(os.getenv("PRICE_HISTORY_LIMIT", "200")))
 REQUEST_DELAY = max(0.2, float(os.getenv("REQUEST_DELAY", "0.5")))
 GEOCODING = os.getenv("GEOCODING", "true").lower() == "true"
 GEOCODER_USER_AGENT = os.getenv("GEOCODER_USER_AGENT", "BlocketTracker/1.0 personal NAS car tracker")

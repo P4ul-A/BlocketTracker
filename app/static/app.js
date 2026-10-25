@@ -124,6 +124,8 @@ if (form) {
 const searchPage = document.querySelector('#search-page');
 if (searchPage) {
   const id = searchPage.dataset.id;
+  const resultsFilters = document.querySelector('#results-filters');
+  let appliedFilters = new URLSearchParams();
   const favouritesFirst = document.querySelector('#favourites-first');
   const favouritesPreference = `favourites-first-${id}`;
   try { favouritesFirst.checked = localStorage.getItem(favouritesPreference) === 'true'; }
@@ -233,6 +235,7 @@ if (searchPage) {
         sort: document.querySelector('#sort-filter').value,
         deals: document.querySelector('#deals-filter').checked,
         archived: document.querySelector('#archived-filter').checked});
+      appliedFilters.forEach((value, key) => params.set(key, value));
       document.querySelectorAll('.finding-grid input:checked').forEach(input => {
         if (input.value) params.set('fact_' + input.dataset.fact, input.value);
       });
@@ -246,6 +249,7 @@ if (searchPage) {
       document.querySelector('#collection-timestamp').textContent = `${running ? 'Refreshing · ' : queued ? 'Queued · ' : ''}Collected: ${date(search.last_success)}`;
       document.querySelector('#collection-status').textContent = `${running ? 'Refreshing' : queued ? 'Queued' : search.status} · Last successful collection: ${date(search.last_success)}. ${search.message}${search.pending_config ? ' Changes saved. A refresh with your latest settings will run after the current refresh finishes.' : ''}`;
       document.querySelector('#listing-count').textContent = cars.length;
+      document.querySelector('#results-filter-status').textContent = appliedFilters.size ? `${cars.length} matching listings` : '';
       document.querySelector('#deal-count').textContent = cars.filter(c => c.highlight || c.above_estimate).length;
       const local = model.search_group;
       document.querySelector('#sample-count').textContent = local?.count || 0;
@@ -285,6 +289,32 @@ if (searchPage) {
       if (reloadPending) { reloadPending = false; load(); }
     }
   }
+  // Apply complete ranges together; background polling keeps the applied values.
+  resultsFilters.addEventListener('input', () => {
+    resultsFilters.querySelectorAll('input').forEach(input => input.setCustomValidity(''));
+  });
+  resultsFilters.addEventListener('submit', event => {
+    event.preventDefault();
+    for (const field of ['year', 'mileage', 'price']) {
+      const low = resultsFilters.elements[`${field}_from`];
+      const high = resultsFilters.elements[`${field}_to`];
+      high.setCustomValidity(low.value !== '' && high.value !== '' && Number(low.value) > Number(high.value)
+        ? 'The maximum must be at least the minimum.' : '');
+    }
+    if (!resultsFilters.reportValidity()) return;
+    appliedFilters = new URLSearchParams();
+    new FormData(resultsFilters).forEach((value, key) => {
+      if (value !== '') appliedFilters.set(key, value);
+    });
+    firstBounds = true;
+    load();
+  });
+  resultsFilters.addEventListener('reset', () => {
+    resultsFilters.querySelectorAll('input').forEach(input => input.setCustomValidity(''));
+    appliedFilters = new URLSearchParams();
+    firstBounds = true;
+    load();
+  });
   ['seller-filter', 'sort-filter', 'deals-filter', 'archived-filter'].forEach(id => {
     document.getElementById(id).addEventListener('change', () => { firstBounds = true; load(); });
   });

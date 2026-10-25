@@ -10,18 +10,27 @@ learns an asking-price model. Manage the Compose stack through Dockhand.
   region, transmission, fuel, and private/commercial/unknown seller filters.
 - Listing cards and an interactive OpenStreetMap map, with town-level geocoding
   when advert coordinates are missing.
+- Results-only year, mileage, price, and manual/automatic filters, with Apply and
+  Clear actions. These narrow the cards and map without editing the saved search.
 - Six-hour refreshes, manual refresh, clear collection status, and retained history.
 - Broader car comparables for training, independent of budget, region, and seller
   selection. Seller type is a model feature as well as a filter.
 - Configurable price highlights: green below and red above the estimate, defaulting
   to a symmetric 10% threshold. Cards, badges, and map markers use the same colors.
   “Highlights only” includes both directions.
-- Price history shows a smooth line through the last confirmed sighting. Hover over
+- Price history saves one confirmation per listing seen in each search refresh,
+  including unchanged prices, and draws a dot for each recorded price. Hover over
   a point or focus it with the keyboard to see its price and collection timestamp
-  in Stockholm time. Curves between observations are illustrative. An unchanged
-  price appears as a flat line once the car has been seen again. SQLite stores price
-  changes only; the chart uses the listing's last-seen time for its endpoint and
-  never extends the line to the current time without a new sighting.
+  in Stockholm time. Curves between observations are illustrative. Duplicate page
+  results, cached-detail enrichment, and page visits do not add confirmations.
+  Each listing retains at most `PRICE_HISTORY_LIMIT` observations (default 200,
+  minimum 2). The first point and newest half of the limit are preserved; older
+  history is gradually thinned, prioritizing significant price changes and wider
+  time spacing. This keeps long-term trends at lower resolution while recent
+  confirmations retain full detail. Retained points are real observations. A lower
+  configured limit also compacts existing history at startup. On upgrade, the
+  previous last-seen endpoint is preserved where its price is known, but earlier
+  unchanged sightings cannot be reconstructed because they were never stored.
 
 ## Deploy on HexOS / Dockhand
 
@@ -89,6 +98,10 @@ sellers can also have an `org_id`, so that field alone is **not** treated as pro
 a commercial seller. Unknown classifications stay unknown. The upstream detail
 parser's default-to-private fallback is not trusted without an explicit search signal.
 The results-page seller filter further narrows the saved search's existing matches.
+The results-only year, mileage, and price ranges are inclusive, and transmission
+can be narrowed to manual or automatic. Apply combines these filters with the
+existing seller, description, and highlight controls; Clear removes the numeric
+and transmission filters. No new upstream search or model retraining is triggered.
 
 A refresh visits purchase-search pages, enriches up to `DETAIL_LIMIT` adverts,
 then collects broader make/model comparables. It does not apply purchase filters to
@@ -155,6 +168,7 @@ is enabled, extracted description facts are included in the structured price mod
 | `PORT` | `8080` | NAS HTTP port |
 | `MAX_PAGES` | `50` | Pages per purchase/broad query, maximum 50 |
 | `DETAIL_LIMIT` | `100` | Maximum detail requests per search refresh; zero disables them |
+| `PRICE_HISTORY_LIMIT` | `200` | Maximum observations per listing, minimum 2; retain recent detail and progressively thin older history |
 | `REQUEST_DELAY` | `0.5` | Minimum seconds between Blocket requests, at least 0.2 |
 | `GEOCODING` | `true` | Enable town-level fallback geocoding |
 | `GEOCODER_URL` | Public Nominatim search endpoint | Switch geocoding provider without changing code |
@@ -168,7 +182,10 @@ is enabled, extracted description facts are included in the structured price mod
 - `GET/POST /api/searches`; `PUT/DELETE /api/searches/{id}`: saved criteria.
 - `POST /api/searches/{id}/refresh`: asynchronous refresh (`202`).
 - `GET /api/searches/{id}/listings`: results; optional `seller`, `deals`, `archived`,
-  and `sort=discount|price|newest` query parameters.
+  `sort=discount|price|newest`, `year_from`, `year_to`, `mileage_from`, `mileage_to`,
+  `price_from`, `price_to`, and `transmission=MANUAL|AUTOMATIC` query parameters.
+  Result ranges use kilometres and SEK, reject inverted bounds, and only narrow
+  the saved search's matches.
 - `GET /api/listings/{id}`: normalized details and observed price history.
 - `GET /api/settings/tasks`: running/queued tasks and the latest 50 finished runs,
   including subtask statuses, timestamps, progress messages, and durations.

@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import json
 import sqlite3
 
-from .config import DATA_DIR, LLM_ENABLED
+from .config import DATA_DIR, LLM_ENABLED, PRICE_HISTORY_LIMIT
 
 
 def now():
@@ -96,6 +96,19 @@ def init():
         if db.execute("PRAGMA user_version").fetchone()[0] < 2:
             migrate_mileage_to_km(db)
             db.execute("PRAGMA user_version=2")
+        if db.execute("PRAGMA user_version").fetchone()[0] < 3:
+            # Preserve the last confirmed endpoint from the changes-only history.
+            # Earlier unchanged sightings were never stored and cannot be recovered.
+            db.execute("""INSERT INTO price_history(listing_id,observed_at,price)
+                SELECT l.id,l.last_seen,h.price FROM listings l
+                JOIN price_history h ON h.id=(
+                    SELECT MAX(id) FROM price_history WHERE listing_id=l.id)
+                WHERE h.observed_at < l.last_seen
+                    AND h.price=json_extract(l.data,'$.price')""")
+            db.execute("PRAGMA user_version=3")
+        for row in db.execute("""SELECT listing_id FROM price_history
+                GROUP BY listing_id HAVING COUNT(*) > ?""", (PRICE_HISTORY_LIMIT,)).fetchall():
+            compact_price_history(db, row["listing_id"])
         db.execute("UPDATE searches SET status='interrupted', message='Refresh interrupted by restart; queued for retry.' WHERE status='running'")
         # Previous condition categories do not mean the same as drivability.
         # Retire those filters explicitly rather than silently changing their meaning.
@@ -228,21 +241,66 @@ def get_search(search_id):
     return next((s for s in searches() if s["id"] == search_id), None)
 
 
-def save_listing(data, raw, detail=None):
-    """Upsert an advert and append a history record only when its price changes."""
+def compact_price_history(db, listing_id):
+    """Bound history by thinning older observations, retaining long-term trends.
+
+    Keep the first point and the newest half of the limit at full resolution.
+    Remove older points with the smallest triangle area between their neighbours,
+    preferring closely spaced points when areas tie. This favours meaningful
+    price changes and spreads unchanged-price confirmations across time. Missing
+    price boundaries are retained preferentially. Retained points are always
+    actual observations, never averages or invented confirmations.
+    """
+    rows = db.execute("""SELECT id,observed_at,price FROM price_history
+        WHERE listing_id=? ORDER BY observed_at,id""", (listing_id,)).fetchall()
+    if len(rows) <= PRICE_HISTORY_LIMIT:
+        return
+    points = [(row["id"], datetime.fromisoformat(row["observed_at"]).timestamp(), row["price"])
+              for row in rows]
+
+    def importance(index):
+        """Rank an older point by the price shape lost if it is removed."""
+        _, before_time, before_price = points[index - 1]
+        _, observed, price = points[index]
+        _, after_time, after_price = points[index + 1]
+        span = after_time - before_time
+        if None in (before_price, price, after_price):
+            area = 0 if before_price == price == after_price else float("inf")
+        else:
+            area = abs((price - before_price) * span
+                       - (after_price - before_price) * (observed - before_time))
+        return area, span
+
+    removed = []
+    while len(points) > PRICE_HISTORY_LIMIT:
+        older = range(1, len(points) - PRICE_HISTORY_LIMIT // 2)
+        index = min(older, key=importance)
+        removed.append((points.pop(index)[0],))
+    db.executemany("DELETE FROM price_history WHERE id=?", removed)
+
+
+def save_listing(data, raw, detail=None, record_observation=True):
+    """Save an advert and record every collection sighting, even unchanged prices.
+
+    Cached-detail enrichment and duplicate processing set record_observation=False
+    so they update advert data without inventing a sighting or price confirmation.
+    Thin older history to PRICE_HISTORY_LIMIT points, preserving long-term trends.
+    """
     timestamp = now()
     with connect() as db:
-        old = db.execute("SELECT data FROM listings WHERE id=?", (data["id"],)).fetchone()
         db.execute("""INSERT INTO listings(id,data,raw,first_seen,last_seen,detail,detail_at)
             VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET
-            data=excluded.data, raw=excluded.raw, last_seen=excluded.last_seen,
+            data=excluded.data, raw=excluded.raw,
+            last_seen=CASE WHEN ? THEN excluded.last_seen ELSE listings.last_seen END,
             detail=COALESCE(excluded.detail,listings.detail),
             detail_at=COALESCE(excluded.detail_at,listings.detail_at)""",
             (data["id"], json.dumps(data), json.dumps(raw), timestamp, timestamp,
-             json.dumps(detail) if detail is not None else None, timestamp if detail is not None else None))
-        if old is None or json.loads(old["data"]).get("price") != data.get("price"):
+             json.dumps(detail) if detail is not None else None, timestamp if detail is not None else None,
+             record_observation))
+        if record_observation:
             db.execute("INSERT INTO price_history(listing_id,observed_at,price) VALUES(?,?,?)",
                        (data["id"], timestamp, data.get("price")))
+            compact_price_history(db, data["id"])
 
 
 def listings(search_id, seller="all", archived=False):

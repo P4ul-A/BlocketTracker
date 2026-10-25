@@ -24,6 +24,7 @@ services:
       TZ: Europe/Stockholm
       MAX_PAGES: ${MAX_PAGES:-50}
       DETAIL_LIMIT: ${DETAIL_LIMIT:-100}
+      PRICE_HISTORY_LIMIT: ${PRICE_HISTORY_LIMIT:-200}
       REQUEST_DELAY: ${REQUEST_DELAY:-0.5}
       GEOCODING: ${GEOCODING:-true}
       GEOCODER_URL: ${GEOCODER_URL:-https://nominatim.openstreetmap.org/search}

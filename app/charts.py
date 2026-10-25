@@ -5,31 +5,24 @@ from math import isfinite
 from zoneinfo import ZoneInfo
 
 
-def price_history_chart(history, last_seen=None):
+def price_history_chart(history):
     """Return dated points, axis ticks and a smooth path, or None for no prices.
 
     Horizontal spacing reflects elapsed time. Cubic curves join observations
     without overshooting their prices; intermediate prices are illustrative.
-    History stores changes only, so last_seen extends an unchanged price to its
-    latest confirmed sighting. Never extend beyond a missing-price observation.
+    Each stored confirmation contributes a point, including unchanged prices.
+    Never add points for elapsed time or cached-detail processing.
     """
     observations = []
-    for change in history:
-        price = change["price"]
+    for observation in history:
+        price = observation["price"]
         if price is None or not isfinite(price):
             continue
-        observed = datetime.fromisoformat(change["observed_at"])
+        observed = datetime.fromisoformat(observation["observed_at"])
         observations.append((observed, price))
     observations.sort(key=lambda observation: observation[0])
     if not observations:
         return None
-
-    if last_seen:
-        seen = datetime.fromisoformat(last_seen)
-        last_change = max(datetime.fromisoformat(change["observed_at"]) for change in history)
-        observed, price = observations[-1]
-        if seen > observed and observed == last_change:
-            observations.append((seen, price))
 
     start, end = observations[0][0].timestamp(), observations[-1][0].timestamp()
     prices = [price for _, price in observations]

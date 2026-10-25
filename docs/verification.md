@@ -394,3 +394,33 @@ were retained, timestamps were populated, and task history remained readable.
 Rebuilt and started the Compose service; Docker reported healthy, startup completed,
 and `/health` and `/api/settings/tasks` returned HTTP 200. Background Ollama requests
 also returned HTTP 200. `git diff --check` passed. No tests or notebooks were written.
+
+## Price confirmations, gradual history thinning, and results filters — 25 October 2026
+
+Each listing seen during a search refresh now records a price confirmation even
+when unchanged. Repeated page entries and cached-detail enrichment do not add
+extra sightings. The chart renders the recorded confirmations directly. Startup
+preserves the known last-seen endpoint from legacy changes-only histories; earlier
+unchanged confirmations cannot be reconstructed.
+
+History is capped by `PRICE_HISTORY_LIMIT` (default 200, minimum 2). The first
+observation and newest half of the limit are protected. Older points are removed
+gradually by their contribution to the price curve, preferring close neighbours
+on ties. This preserves long-term coverage and prioritizes significant changes.
+The same compaction applies at startup when the configured limit is lowered.
+
+Added results-only inclusive year, kilometre, and SEK ranges plus manual/automatic
+selection. Apply and Clear affect the listings API used by both cards and map,
+combining with existing toolbar controls without modifying saved criteria.
+
+Manually exercised an isolated temporary database: 450 confirmations compacted to
+200 points while retaining the first observation, an older price spike, and all
+100 newest confirmations. The SVG rendered 200 dots; enrichment left history and
+last-seen unchanged. Combined filters returned the expected cars, including Swedish
+transmission labels. Inverted ranges, negative mileage, and unsupported transmission
+values returned HTTP 422. Search HTML rendered six range inputs, saved criteria
+remained unchanged, and repeated startup preserved the legacy endpoint without
+duplicating it. Python/Jinja parsing, FastAPI registration, JavaScript syntax,
+Compose configuration, and whitespace checks passed. No test files or notebooks
+were written. Live data and deployment were not modified; browser interaction
+remains unverified.

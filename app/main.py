@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Annotated, Literal
 from urllib.parse import urlsplit
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -22,7 +22,7 @@ from .collector import Collector
 from .vehicles import vehicle_group
 from .blocket import matches
 from .description import FACT_LABELS, add_analysis, matches_facts, description_spans
-from .config import LLM_ENABLED, LLM_MODEL, LLM_URL
+from .config import LLM_ENABLED, LLM_MODEL, LLM_URL, PRICE_HISTORY_LIMIT
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 ROOT = Path(__file__).parent
@@ -207,7 +207,10 @@ async def listing_page(request: Request, listing_id: str):
     """Refresh stale details on demand, then render the advert and price history."""
     await request.app.state.collector.ensure_listing_details(listing_id)
     item = listing_detail(listing_id)
-    return templates.TemplateResponse(request=request, name="listing.html", context={"item": item, "description_parts": description_spans(item), "price_chart": price_history_chart(item["history"], item["last_seen"])})
+    return templates.TemplateResponse(request=request, name="listing.html", context={
+        "item": item, "description_parts": description_spans(item),
+        "price_chart": price_history_chart(item["history"]), "price_history_limit": PRICE_HISTORY_LIMIT,
+    })
 
 
 @app.get("/favourites")
@@ -299,8 +302,24 @@ async def refresh_search(search_id: int, request: Request):
 def search_listings(search_id: int, request: Request, seller: Literal["all", "private", "commercial", "unknown"] = "all",
                     archived: bool = False, deals: bool = False,
                     sort: Literal["discount", "price", "newest"] = "discount",
-                    fact: str = "", fact_value: Literal["yes", "no", "unknown"] = "yes"):
-    """Return matched cars with optional seller, deal, archive, and sort controls."""
+                    fact: str = "", fact_value: Literal["yes", "no", "unknown"] = "yes",
+                    year_from: Annotated[int | None, Query(ge=1900, le=2100)] = None,
+                    year_to: Annotated[int | None, Query(ge=1900, le=2100)] = None,
+                    mileage_from: Annotated[int | None, Query(ge=0)] = None,
+                    mileage_to: Annotated[int | None, Query(ge=0)] = None,
+                    price_from: Annotated[int | None, Query(ge=0)] = None,
+                    price_to: Annotated[int | None, Query(ge=0)] = None,
+                    transmission: Literal["", "MANUAL", "AUTOMATIC"] = ""):
+    """Narrow saved matches without collecting adverts or changing saved criteria.
+
+    Ranges are inclusive; mileage is kilometres and prices are SEK. An active
+    filter excludes adverts whose corresponding measurement is unknown.
+    """
+    ranges = (("year", year_from, year_to), ("mileage", mileage_from, mileage_to),
+              ("price", price_from, price_to))
+    for field, low, high in ranges:
+        if low is not None and high is not None and low > high:
+            raise HTTPException(422, f"Minimum {field} must not exceed maximum {field}")
     if fact and fact not in FACT_LABELS:
         raise HTTPException(422, "Unsupported description finding")
     fact_filters = {fact: fact_value} if fact else {}
@@ -313,6 +332,15 @@ def search_listings(search_id: int, request: Request, seller: Literal["all", "pr
     search = require_search(search_id)
     items = [item for item in db.listings(search_id, seller, archived) if matches(item, search["config"])]
     items = [item for item in items if matches_facts(item, search["config"].get("description_filters", {}))]
+    for field, low, high in ranges:
+        if low is not None:
+            items = [item for item in items if item.get(field) is not None and item[field] >= low]
+        if high is not None:
+            items = [item for item in items if item.get(field) is not None and item[field] <= high]
+    if transmission:
+        labels = {"MANUAL": {"manual", "manuell"},
+                  "AUTOMATIC": {"automatic", "automat", "automatisk", "auto"}}
+        items = [item for item in items if item.get("transmission", "").strip().casefold() in labels[transmission]]
     if fact_filters:
         items = [item for item in items if matches_facts(item, fact_filters)]
     for item in items:

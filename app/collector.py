@@ -119,8 +119,8 @@ class Collector:
         if coords:
             car.update(coords, approximate=True)
 
-    async def store(self, raw, enrich=False, detail_budget=None):
-        """Reuse cached detail for a day; defer excess enrichment to future runs."""
+    async def store(self, raw, enrich=False, detail_budget=None, record_observation=True):
+        """Save a sighting, reusing daily details without recording enrichment twice."""
         listing_id = str(raw["id"])
         with db.connect() as connection:
             old = connection.execute("SELECT data,detail,detail_at FROM listings WHERE id=?", (listing_id,)).fetchone()
@@ -152,7 +152,7 @@ class Collector:
                 car.update(lat=previous["lat"], lon=previous["lon"], approximate=True)
         if enrich:
             await self.geocode(car)
-        db.save_listing(car, raw, fresh_detail)
+        db.save_listing(car, raw, fresh_detail, record_observation=record_observation)
         return car, warning
 
     async def refresh(self, search_id, task_id=None):
@@ -179,7 +179,7 @@ class Collector:
             async for docs, complete, summary in self.api.pages(config):
                 for raw in docs:
                     purchase_docs[str(raw["id"])] = raw
-                    car, _ = await self.store(raw)
+                    car, _ = await self.store(raw, record_observation=str(raw["id"]) not in collected_ids)
                     collected_ids.add(car["id"])
                     if matches(car, config):
                         seen_matches.add(car["id"])
@@ -194,7 +194,7 @@ class Collector:
             for raw in sorted(purchase_docs.values(), key=lambda r: detail_dates.get(str(r["id"]), "")):
                 if model_key(str(raw.get("model", ""))) != model_key(config["model"]):
                     continue
-                car, warning = await self.store(raw, True, budget)
+                car, warning = await self.store(raw, True, budget, record_observation=False)
                 if warning:
                     warnings.add(warning)
                 if matches(car, config):
@@ -206,7 +206,7 @@ class Collector:
                 for raw in docs:
                     # Purchase adverts already stored with richer location/details.
                     if str(raw["id"]) not in seen_matches:
-                        car, _ = await self.store(raw)
+                        car, _ = await self.store(raw, record_observation=str(raw["id"]) not in collected_ids)
                         collected_ids.add(car["id"])
                 broad_summary = "Comparables: " + summary
                 task_log.update_step(task_id, "collection", "running", broad_summary)
