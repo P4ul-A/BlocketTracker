@@ -2,6 +2,9 @@
 
 /* Narrow the current results with inclusive ranges, keeping phone inputs usable. */
 .results-filters{margin:25px 0}
+.toolbar .results-filter-toggle{min-height:44px;padding:10px 12px;font-size:14px;gap:8px;background:white}
+.results-filter-toggle[aria-expanded="true"]{border-color:#82ad5a}
+.results-filter-toggle [hidden]{display:none}
 .results-filters h2{margin-bottom:8px}
 .results-filters>p{margin:0 0 18px}
 .results-filter-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(160px,.9fr);gap:18px;align-items:end}

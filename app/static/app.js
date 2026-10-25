@@ -125,6 +125,12 @@ const searchPage = document.querySelector('#search-page');
 if (searchPage) {
   const id = searchPage.dataset.id;
   const resultsFilters = document.querySelector('#results-filters');
+  const filtersToggle = document.querySelector('#toggle-results-filters');
+  const filtersCount = document.querySelector('#results-filter-count');
+  filtersToggle.addEventListener('click', () => {
+    resultsFilters.hidden = !resultsFilters.hidden;
+    filtersToggle.setAttribute('aria-expanded', String(!resultsFilters.hidden));
+  });
   let appliedFilters = new URLSearchParams();
   const favouritesFirst = document.querySelector('#favourites-first');
   const favouritesPreference = `favourites-first-${id}`;
@@ -306,12 +312,16 @@ if (searchPage) {
     new FormData(resultsFilters).forEach((value, key) => {
       if (value !== '') appliedFilters.set(key, value);
     });
+    const count = new Set([...appliedFilters.keys()].map(key => key.split('_')[0])).size;
+    filtersCount.textContent = `${count} active`;
+    filtersCount.hidden = count === 0;
     firstBounds = true;
     load();
   });
   resultsFilters.addEventListener('reset', () => {
     resultsFilters.querySelectorAll('input').forEach(input => input.setCustomValidity(''));
     appliedFilters = new URLSearchParams();
+    filtersCount.hidden = true;
     firstBounds = true;
     load();
   });

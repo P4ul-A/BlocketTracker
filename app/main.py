@@ -22,7 +22,7 @@ from .collector import Collector
 from .vehicles import vehicle_group
 from .blocket import matches
 from .description import FACT_LABELS, add_analysis, matches_facts, description_spans
-from .config import LLM_ENABLED, LLM_MODEL, LLM_URL, PRICE_HISTORY_LIMIT
+from .config import LLM_ENABLED, LLM_MODEL, LLM_URL
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 ROOT = Path(__file__).parent
@@ -209,7 +209,7 @@ async def listing_page(request: Request, listing_id: str):
     item = listing_detail(listing_id)
     return templates.TemplateResponse(request=request, name="listing.html", context={
         "item": item, "description_parts": description_spans(item),
-        "price_chart": price_history_chart(item["history"]), "price_history_limit": PRICE_HISTORY_LIMIT,
+        "price_chart": price_history_chart(item["history"]),
     })
 
 
