@@ -121,6 +121,28 @@ class BlocketClient:
         detail["description_checked"] = True
         return detail
 
+    async def availability(self, listing_id):
+        """Confirm sold banners; a missing page means removed, not confirmed sold.
+
+        Inspect standalone page labels only, never descriptions or substrings such
+        as 'Svensksåld'. Unknown markup must leave availability unconfirmed.
+        """
+        try:
+            html = await self.get(f"https://www.blocket.se/mobility/item/{int(listing_id)}", {}, as_text=True)
+        except httpx.HTTPStatusError as error:
+            if error.response.status_code in {404, 410}:
+                return "removed"
+            raise
+        soup = BeautifulSoup(html, "html.parser")
+        for element in soup.find_all(["h1", "h2", "h3", "span", "p", "div"]):
+            if element.find(True):
+                continue
+            if element.get_text(" ", strip=True).casefold().rstrip(".! ") in {
+                "såld", "sold", "annonsen är såld", "bilen är såld", "den här bilen är såld",
+            }:
+                return "sold"
+        return "unknown"
+
 
 def parse_description(html):
     """Extract only the advert description section, preserving paragraph breaks.

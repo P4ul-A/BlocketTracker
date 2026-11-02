@@ -49,6 +49,8 @@
 /* Keep full-size photos inside an accessible modal preview. */
 .gallery-preview{display:block;min-width:0;padding:0;border:0;border-radius:8px;background:transparent;cursor:zoom-in}.image-preview{width:min(1100px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--white);overflow:auto}.image-preview::backdrop{background:#000b}.image-preview button{display:flex;margin:0 0 12px auto}.image-preview img{display:block;width:100%;max-height:calc(100dvh - 130px);object-fit:contain}
 
+.image-preview-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}.image-preview-controls button{margin:0}.image-preview-controls #close-image-preview{margin-left:auto}
+
 /* Pair Ollama status text with a color indicator; checking never implies readiness. */
 #ollama-status::before{content:"";display:inline-block;width:10px;height:10px;margin-right:10px;border-radius:50%;background:#8b948f}
 #ollama-status[data-state="ready"]::before{background:#368444;box-shadow:0 0 0 4px #36844418}

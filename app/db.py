@@ -288,6 +288,14 @@ def save_listing(data, raw, detail=None, record_observation=True):
     """
     timestamp = now()
     with connect() as db:
+        previous = db.execute("SELECT data FROM listings WHERE id=?", (data["id"],)).fetchone()
+        if record_observation:
+            data["availability"] = "live"
+        elif previous:
+            cached = json.loads(previous["data"])
+            for key in ("availability", "availability_checked_at"):
+                if key in cached:
+                    data[key] = cached[key]
         db.execute("""INSERT INTO listings(id,data,raw,first_seen,last_seen,detail,detail_at)
             VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET
             data=excluded.data, raw=excluded.raw,

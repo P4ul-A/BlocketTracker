@@ -174,9 +174,10 @@ if (searchPage) {
     actions.append(favouriteButton(car));
     body.append(actions, meta);
     const priceBadges = node('div', null, 'listing-price-badges');
-    if (car.highlight) priceBadges.append(node('span', `${car.discount.toFixed(1)}% below estimate`, 'deal-badge'));
-    if (car.above_estimate) priceBadges.append(node('span', `${Math.abs(car.discount).toFixed(1)}% above estimate`, 'deal-badge over-estimate-badge'));
-    if (!car.active) priceBadges.append(node('span', 'Not seen in latest complete search', 'badge'));
+    if (car.highlight) priceBadges.append(node('span', `${Number(car.discount.toFixed(1))}% below estimate`, 'deal-badge'));
+    if (car.above_estimate) priceBadges.append(node('span', `${Number(Math.abs(car.discount).toFixed(1))}% above estimate`, 'deal-badge over-estimate-badge'));
+    if (['sold', 'removed'].includes(car.availability)) priceBadges.append(node('span', car.availability === 'sold' ? 'Sold' : 'Advert removed', 'badge'));
+    else if (!car.active) priceBadges.append(node('span', 'Not seen in latest complete search', 'badge'));
     if (priceBadges.childNodes.length) actions.append(priceBadges);
     const facts = {...(car.analysis?.status === 'ready' ? car.analysis.facts : {})};
     const labels = {drivable: 'Drivable', extra_tires: 'Additional tyres', winter_tires: 'Winter tyres', summer_tires: 'Summer tyres'};
@@ -390,13 +391,32 @@ if (findingDialog) {
 const imagePreview = document.querySelector('#image-preview');
 if (imagePreview) {
   const photo = document.querySelector('#image-preview-photo');
-  document.querySelectorAll('.gallery-preview').forEach(button => {
+  const thumbnails = [...document.querySelectorAll('.gallery-preview img')];
+  const previous = document.querySelector('#previous-image');
+  const next = document.querySelector('#next-image');
+  const count = document.querySelector('#image-preview-count');
+  let imageIndex = 0;
+  // Wrap at either end so navigation stays usable without moving focus.
+  function showImage(index) {
+    imageIndex = (index + thumbnails.length) % thumbnails.length;
+    photo.src = thumbnails[imageIndex].src;
+    photo.alt = thumbnails[imageIndex].alt;
+    count.textContent = `${imageIndex + 1} / ${thumbnails.length}`;
+    previous.disabled = next.disabled = thumbnails.length < 2;
+  }
+  document.querySelectorAll('.gallery-preview').forEach((button, index) => {
     button.addEventListener('click', () => {
-      const thumbnail = button.querySelector('img');
-      photo.src = thumbnail.src;
-      photo.alt = thumbnail.alt;
+      showImage(index);
       imagePreview.showModal();
     });
+  });
+  previous.addEventListener('click', () => showImage(imageIndex - 1));
+  next.addEventListener('click', () => showImage(imageIndex + 1));
+  imagePreview.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      showImage(imageIndex + (event.key === 'ArrowLeft' ? -1 : 1));
+    }
   });
   document.querySelector('#close-image-preview').addEventListener('click', () => imagePreview.close());
   imagePreview.addEventListener('click', event => {
@@ -527,7 +547,7 @@ if (taskLog) {
           if (step.finished_at) info.push(`Finished ${date(step.finished_at)}`);
           if (step.message) info.push(step.message);
           if (step.name === 'analysis' && active && ['running', 'waiting'].includes(step.status)) {
-            const speed = step.listings_per_minute == null ? 'Calculating listings/min…' : `${step.listings_per_minute.toFixed(1)} listings/min`;
+            const speed = step.listings_per_minute == null ? 'Calculating listings/min…' : `${Number(step.listings_per_minute.toFixed(1))} listings/min`;
             const eta = step.eta_at ? `Est. analysis finish: ${date(step.eta_at)}` : step.listings_per_minute == null ? 'ETA available after the first completed listing' : 'Analysis done';
             info.push(speed, eta);
           }

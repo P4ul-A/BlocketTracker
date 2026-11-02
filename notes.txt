@@ -1,0 +1,6 @@
+Filter for recent price drops
+LLM to filter out 
+- leasing
+- Såld listings 
+- add "reparationsobjekt eller reservdelsbil. " to not driveable
+

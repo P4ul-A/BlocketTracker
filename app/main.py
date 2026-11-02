@@ -102,6 +102,17 @@ async def lifespan(app):
 app = FastAPI(title="Blocket Tracker", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 templates = Jinja2Templates(directory=ROOT / "templates")
+
+
+def display_number(value, grouped=False):
+    """Omit decimal zeros and optionally separate thousands with spaces."""
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        value = int(value) if value == int(value) else value
+        return format(value, ",").replace(",", " ") if grouped else str(value)
+    return value
+
+
+templates.env.filters["number"] = display_number
 # A changed script URL prevents browsers from reusing JavaScript from an older build.
 templates.env.globals["style_version"] = (ROOT / "static" / "style.css").stat().st_mtime_ns
 templates.env.globals["app_js_version"] = (ROOT / "static" / "app.js").stat().st_mtime_ns

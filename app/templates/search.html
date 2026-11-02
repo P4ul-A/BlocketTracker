@@ -33,7 +33,7 @@
 {% for key,label in fact_labels.items() %}<tr><th scope="row">{{ label }}</th>{% for value,title in [('', 'Any'),('yes','Yes'),('no','No'),('unknown','Unknown')] %}<td><label><input type="radio" name="finding_{{ key }}" value="{{ value }}" data-fact="{{ key }}" aria-label="{{ label }}: {{ title }}" {% if value == '' %}checked{% endif %}></label></td>{% endfor %}</tr>{% endfor %}
 </tbody></table></div><p id="analysis-status" class="small subtle" aria-live="polite"></p>
 </div>
-</details><label class="checkbox"><input type="checkbox" id="favourites-first"> Favourites first</label><label class="checkbox"><input type="checkbox" id="deals-filter"> Highlights only</label><label class="checkbox"><input type="checkbox" id="archived-filter"> Include not seen</label></div>
+</details><label class="checkbox"><input type="checkbox" id="favourites-first"> Favourites first</label><label class="checkbox"><input type="checkbox" id="deals-filter"> Highlights only</label><label class="checkbox"><input type="checkbox" id="archived-filter"> Include sold / not seen</label></div>
 <form id="results-filters" class="panel results-filters" hidden>
 <h2>Filter these results</h2>
 <p class="small subtle">Narrow this search’s saved matches. These filters leave your saved search unchanged. Filtered fields must have a known value.</p>

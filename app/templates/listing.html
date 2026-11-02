@@ -2,11 +2,16 @@
 {% block title %}{{ item.title }} · Blocket Tracker{% endblock %}
 {% block content %}
 <a class="back" href="/" onclick="if(document.referrer.startsWith(location.origin)){history.back();return false}">← Back to results</a>
-<div class="page-heading heading-row"><div><p class="eyebrow">{{ item.seller_type }} seller · {{ item.location or 'Location unavailable' }}</p><h1>{{ item.title }}</h1><p class="subtle">{{ item.variant }}</p></div><div class="actions">{% include 'favourite_button.html' %}<a class="button" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View on Blocket ↗</a></div></div>
+<div class="page-heading heading-row"><div><p class="eyebrow">{{ item.seller_type }} seller · {{ item.location or 'Location unavailable' }}</p><h1>{{ item.title }}</h1>{% include 'availability.html' %}<p class="subtle">{{ item.variant }}</p></div><div class="actions">{% include 'favourite_button.html' %}<a class="button" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View on Blocket ↗</a></div></div>
 <div class="detail-layout"><div>
 {% if item.images %}<div class="gallery">{% for image in item.images[:12] %}<button type="button" class="gallery-preview" aria-haspopup="dialog" aria-controls="image-preview" aria-label="Preview photo {{ loop.index }}"><img src="{{ image }}" alt="{{ item.title }} photo {{ loop.index }}" loading="lazy" referrerpolicy="no-referrer"></button>{% endfor %}</div>
 <dialog id="image-preview" class="image-preview" aria-label="Photo preview">
-  <button type="button" class="button small" id="close-image-preview" autofocus>Close preview</button>
+  <div class="image-preview-controls">
+    <button type="button" class="button small" id="previous-image" aria-label="Previous photo">← Previous</button>
+    <span id="image-preview-count" class="small subtle" aria-live="polite"></span>
+    <button type="button" class="button small" id="next-image" aria-label="Next photo">Next →</button>
+    <button type="button" class="button small" id="close-image-preview" autofocus>Close preview</button>
+  </div>
   <img id="image-preview-photo" alt="" referrerpolicy="no-referrer">
 </dialog>{% endif %}
 <section class="panel description-card" id="description-analysis" data-listing-id="{{ item.id }}" data-status="{{ item.analysis.status }}">
@@ -19,9 +24,9 @@
 <p class="description">{% if item.description %}{% for part in description_parts %}{% if part.label %}<mark class="description-highlight highlight-{{ part.tone }}" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="finding-dialog" data-decisions="{{ part.decisions|tojson|forceescape }}" title="Click to see the extracted finding" aria-label="{{ part.text }} — {{ part.label }}">{{ part.text }}</mark>{% else %}{{ part.text }}{% endif %}{% endfor %}{% else %}No description available yet. Open the original advert for complete information.{% endif %}</p>
 {% if item.equipment %}<h3>Equipment</h3><ul>{% for value in item.equipment %}<li>{{ value }}</li>{% endfor %}</ul>{% endif %}
 </section>
-{% if item.specifications %}<section class="panel"><h2>Advert specifications</h2><dl class="specs">{% for key,value in item.specifications.items() %}<dt>{{ key }}</dt><dd>{{ value }}</dd>{% endfor %}</dl></section>{% endif %}
+{% if item.specifications %}<section class="panel"><h2>Advert specifications</h2><dl class="specs">{% for key,value in item.specifications.items() %}<dt>{{ key }}</dt><dd>{{ value|number }}</dd>{% endfor %}</dl></section>{% endif %}
 </div><aside>
-<section class="panel"><p class="eyebrow">ASKING PRICE</p><h2 class="price">{{ '{:,.0f}'.format(item.price).replace(',', ' ') ~ ' SEK' if item.price is not none else 'Unavailable' }}</h2><p>Estimated asking price<br><strong>{{ '{:,.0f}'.format(item.estimate).replace(',', ' ') ~ ' SEK' if item.estimate else 'Not enough data' }}</strong></p>{% if item.comparable_count %}<p class="small subtle">{{ item.comparable_count }} make/model comparables. Estimate excludes this advert’s own asking price.</p>{% endif %}<dl class="specs">{% for key,label in [('year','Model year'),('mileage','Mileage (km)'),('fuel','Fuel'),('transmission','Transmission'),('seller_type','Seller type'),('seller_name','Seller'),('location','Location')] %}<dt>{{ label }}</dt><dd>{% if item[key] is none or item[key] == '' %}Unknown{% elif key in ['year', 'mileage'] %}{{ '{:.0f}'.format(item[key]) }}{% else %}{{ item[key] }}{% endif %}</dd>{% endfor %}</dl></section>
+<section class="panel"><p class="eyebrow">ASKING PRICE</p><h2 class="price">{{ '{:,.0f}'.format(item.price).replace(',', ' ') ~ ' SEK' if item.price is not none else 'Unavailable' }}</h2><p>Estimated asking price<br><strong>{{ '{:,.0f}'.format(item.estimate).replace(',', ' ') ~ ' SEK' if item.estimate else 'Not enough data' }}</strong></p>{% if item.comparable_count %}<p class="small subtle">{{ item.comparable_count }} make/model comparables. Estimate excludes this advert’s own asking price.</p>{% endif %}<dl class="specs">{% for key,label in [('year','Model year'),('mileage','Mileage (km)'),('fuel','Fuel'),('transmission','Transmission'),('seller_type','Seller type'),('seller_name','Seller'),('location','Location')] %}<dt>{{ label }}</dt><dd>{% if item[key] is none or item[key] == '' %}Unknown{% elif key in ['year', 'mileage'] %}{{ item[key]|number(grouped=(key == 'mileage')) }}{% else %}{{ item[key] }}{% endif %}</dd>{% endfor %}</dl></section>
 <section class="panel"><h2>Price history</h2>{% include 'price_history.html' %}<p class="small subtle">First seen <time data-date="{{ item.first_seen }}">{{ item.first_seen }}</time><br>Last seen <time data-date="{{ item.last_seen }}">{{ item.last_seen }}</time><br>Details fetched <time data-date="{{ item.detail_at or '' }}">{{ item.detail_at or 'Not yet' }}</time></p></section>
 </aside></div>
 <dialog id="finding-dialog" class="finding-dialog" aria-labelledby="finding-dialog-title">

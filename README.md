@@ -6,6 +6,16 @@ learns an asking-price model. Manage the Compose stack through Dockhand.
 
 ## What it does
 
+Whole numbers display without a trailing `.0`; meaningful fractional values remain.
+Missing adverts are checked after complete search refreshes, with availability
+checks cached for one day. Opening an advert also checks its availability. A
+standalone sold label on Blocket produces a **Sold** badge; HTTP 404/410 produces
+**Advert removed**. Disappearing from search alone does not confirm a sale.
+These badges appear in search results (enable **Include sold / not seen**),
+favourites, and advert details. Last seen remains the last collection sighting,
+not an inferred sale date. Availability detection depends on Blocket's page labels;
+unrecognised markup leaves the status unconfirmed.
+
 - Multiple saved car searches with make/model, keywords, price, year, mileage,
   region, transmission, fuel, and private/commercial/unknown seller filters.
 - Listing cards and an interactive OpenStreetMap map, with town-level geocoding

@@ -59,6 +59,7 @@ class Collector:
         a page was viewed. Failures leave the existing listing available.
         """
         async with self.detail_lock:
+            await self.check_availability(listing_id)
             with db.connect() as connection:
                 row = connection.execute("SELECT detail,detail_at FROM listings WHERE id=?", (listing_id,)).fetchone()
             if row is None:
@@ -78,12 +79,36 @@ class Collector:
                         return
                     previous = json.loads(row["data"])
                     car = normalize(json.loads(row["raw"]), fresh)
+                    for key in ("availability", "availability_checked_at"):
+                        if key in previous:
+                            car[key] = previous[key]
                     if car["lat"] is None and previous.get("approximate"):
                         car.update(lat=previous["lat"], lon=previous["lon"], approximate=True)
                     connection.execute("UPDATE listings SET data=?,detail=?,detail_at=? WHERE id=?",
                                        (json.dumps(car), json.dumps(fresh), db.now(), listing_id))
             except (httpx.HTTPError, ValueError):
                 logger.warning("Could not update details for opened advert %s", listing_id, exc_info=True)
+
+    async def check_availability(self, listing_id):
+        """Cache daily advert checks without inventing sightings or sale dates."""
+        with db.connect() as connection:
+            row = connection.execute("SELECT data FROM listings WHERE id=?", (listing_id,)).fetchone()
+        if row is None:
+            return
+        car = json.loads(row["data"])
+        checked = car.get("availability_checked_at")
+        if checked and datetime.fromisoformat(checked) >= datetime.now(timezone.utc) - timedelta(days=1):
+            return
+        try:
+            status = await self.api.availability(listing_id)
+        except (httpx.HTTPError, ValueError):
+            logger.warning("Could not check advert availability for %s", listing_id)
+            return
+        with db.connect() as connection:
+            # Update just these fields; collection may have enriched the advert.
+            connection.execute("""UPDATE listings SET data=json_set(data,
+                '$.availability', ?, '$.availability_checked_at', ?) WHERE id=?""",
+                               (status, db.now(), listing_id))
 
     async def geocode(self, car):
         """Resolve towns only, globally limited to four requests per minute.
@@ -230,6 +255,11 @@ class Collector:
                 connection.execute("UPDATE searches SET status=?,last_success=?,message=? WHERE id=?",
                                    (status, db.now() if complete else search["last_success"],
                                     message, search_id))
+            if complete and broad_complete:
+                with db.connect() as connection:
+                    missing = connection.execute("SELECT listing_id FROM search_listings WHERE search_id=? AND active=0", (search_id,)).fetchall()
+                for row in missing:
+                    await self.check_availability(row["listing_id"])
             if not LLM_ENABLED:
                 task_log.update_step(task_id, "analysis", "skipped", "LLM analysis is disabled.")
                 task_log.update_step(task_id, "retraining", "skipped", "LLM analysis is disabled.")
